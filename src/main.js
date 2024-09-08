@@ -1,18 +1,45 @@
 const { invoke } = window.__TAURI__.tauri;
 
-let greetInputEl;
-let greetMsgEl;
-
-async function greet() {
+let oInputStrati;
+let oSelectFunzAttivazione;
+let oMessage;
+/*
+async function creaRete() {
   // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-  greetMsgEl.textContent = await invoke("greet", { name: greetInputEl.value });
+  oMessage.textContent = await invoke("crea_rete", { strati: +oInputStrati.value, attivazione: oSelectFunzAttivazione.value });
 }
+*/
 
+/*
 window.addEventListener("DOMContentLoaded", () => {
-  greetInputEl = document.querySelector("#greet-input");
-  greetMsgEl = document.querySelector("#greet-msg");
-  document.querySelector("#greet-form").addEventListener("submit", (e) => {
+  oInputStrati = document.querySelector("#nr_strati");
+  oSelectFunzAttivazione = document.querySelector("#tipo_funz_attivazione");
+
+  oMessage = document.querySelector("#messaggio-creazione");
+  document.querySelector("#create-form").addEventListener("submit", (e) => {
     e.preventDefault();
-    greet();
+    creaRete();
   });
 });
+*/
+
+
+/* ----------------------------- [ App ] ------------------------------ */
+const app =Vue.createApp({
+  data() {
+    return {
+      titolo: "Rete Neurale",
+      messaggio : ''
+    }
+  },
+  methods:{
+    async creaRete(infoRete){
+      // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+      this.messaggio = await invoke("crea_rete", { strati: infoRete.nr_strati, attivazione: infoRete.tipo_funz_attivazione });
+    }
+  }
+})
+
+
+
+

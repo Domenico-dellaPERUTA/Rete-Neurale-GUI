@@ -3,13 +3,13 @@
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+fn crea_rete(strati: u8, attivazione: &str) -> String {
+    format!("Creata la rete con {strati} strati e funzione di attivazione {attivazione}")
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![crea_rete])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
