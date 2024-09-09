@@ -3,8 +3,8 @@
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn crea_rete(strati: u8, attivazione: &str) -> String {
-    format!("Creata la rete con {strati} strati e funzione di attivazione {attivazione}")
+fn crea_rete(strati: u8, attivazione: &str, neuroni: Vec<u8>) -> String {
+    format!("strati: {} - attivazione: {}  -  {:?}",strati,attivazione,neuroni)
 }
 
 fn main() {

@@ -15,6 +15,7 @@ app.component('crea-rete', {
             min="2"
             placeholder="n° strati"
             v-model.number="strati"
+            @change="setStrati"
             required
           />
           <span class="validity"></span>
@@ -45,13 +46,18 @@ app.component('crea-rete', {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th scope="row">strato 1</th>
-            <td><input type="number" value="0"/></td>
-          </tr>
-          <tr>
-            <th scope="row">strato 2</th>
-            <td><input type="number" value="0"/></td>
+          <tr v-for="(item, index) in connessioni">
+            <th scope="row">strato {{ index }}</th>
+            <td>
+                <input 
+                    type="number" 
+                    step="1"
+                    min="1" 
+                    v-model.number="item.neuroni"
+                    required
+                    />
+                <span class="validity"></span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -63,16 +69,27 @@ app.component('crea-rete', {
       data(){
         return {
             strati: 0,
-            funz_attivazione:''
+            funz_attivazione:'',
+            connessioni: []
         }
       },
       methods:{
+        setStrati({ type, target }){
+            const value = target.value;
+            if(value){
+                this.connessioni = []
+                for(let i =0; i < value; i++){
+                    this.connessioni.push({neuroni: 0})
+                }
+            }
+        },
         onSubmit(){
             this.$emit(
                 'nuova-rete',
                 {
                     nr_strati : this.strati,
                     tipo_funz_attivazione: this.funz_attivazione,
+                    neuroni: this.connessioni,
                 }
             )
             // [todo] fare qualcosa dopo l'invio....
