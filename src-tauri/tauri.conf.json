@@ -19,8 +19,8 @@
     "windows": [
       {
         "title": "rete-neurale-gui",
-        "width": 800,
-        "height": 600
+        "width": 1600,
+        "height": 900
       }
     ],
     "security": {

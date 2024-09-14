@@ -176,3 +176,16 @@ input:valid + span::after {
   color: rgb(0, 188, 0);
   font-size: 2rem;
 }
+
+
+.container-col {
+  display: flex;
+  justify-content: space-between;
+}
+
+.colonna {
+  flex: 1; /* Ogni colonna occuperà lo stesso spazio */
+  margin: 10px; /* Spazio tra le colonne */
+  padding: 20px;
+  background-color: rgba(211, 211, 211, 0.057);
+}
