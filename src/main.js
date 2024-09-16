@@ -17,9 +17,10 @@ const app =Vue.createApp({
     async creaRete(infoRete){
       // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
       this.messaggio = await invoke("crea_rete", { 
-        strati: infoRete.nr_strati, 
-        attivazione: infoRete.tipo_funz_attivazione,
-        neuroni: infoRete.neuroni.map( item => item.neuroni )
+        apprendimento: infoRete.tasso_apprendimento, 
+        attivazione:   infoRete.tipo_funz_attivazione,
+        neuroni:       infoRete.neuroni.map( item => item.neuroni ),
+        alfa:          infoRete.alfa
       });
     }
   }

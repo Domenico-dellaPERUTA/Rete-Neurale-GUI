@@ -12,13 +12,13 @@ static RETE: RwLock<Option<ReteNeurale>> = RwLock::new(None);
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn crea_rete(strati: usize, attivazione: &str, neuroni: Vec<usize>) -> String {
+fn crea_rete(apprendimento: f64, attivazione: &str, neuroni: Vec<usize>, alfa: f64) -> String {
     // Scegli la funzione di attivazione basata sulla stringa 'attivazione'
     let funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync> = match attivazione {
    
         "Sigmoide"  => Arc::new(Sigmoide),
         "ReLU"      => Arc::new(ReLU),
-        "LeakyReLU" => Arc::new(LeakyReLU { alpha: 0.5 }),
+        "LeakyReLU" => Arc::new(LeakyReLU { alpha: alfa }),
         "Tanh"      => Arc::new(Tanh),
         "Softplus"  => Arc::new(Softplus),
         "Swish"     => Arc::new(Swish),
@@ -26,7 +26,7 @@ fn crea_rete(strati: usize, attivazione: &str, neuroni: Vec<usize>) -> String {
     };
 
     // Crea una nuova rete neurale usando Arc per la funzione di attivazione
-    let rete = ReteNeurale::nuova(neuroni,0.1, funzione_attivazione.into());
+    let rete = ReteNeurale::nuova(neuroni,apprendimento, funzione_attivazione.into());
 
     // Scrivi la nuova rete neurale all'interno di RETE
     let mut rete_guard = RETE.write().unwrap();

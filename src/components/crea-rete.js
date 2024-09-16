@@ -21,9 +21,24 @@ app.component('crea-rete', {
                 <span class="validity"></span>
             </div>
             <div>
+                <input 
+                    id="apprendimento" 
+                    type="number" 
+                    tabindex="2" 
+                    inputmode="numeric"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="tasso appr."
+                    v-model.number="apprendimento"
+                    required
+                />
+                <span class="validity"></span>
+            </div>
+            <div>
                 <select 
                     id="tipo_funz_attivazione" 
                     v-model="funz_attivazione"
+                    tabindex="3" 
                     required
                     >
                     <option value="">-- Funzione di attivazione --</option>
@@ -34,6 +49,20 @@ app.component('crea-rete', {
                     <option value="Softplus">Softplus</option>
                     <option value="Swish">Swish</option>
                 </select>
+                <span class="validity"></span>
+            </div>
+            <div v-if="funz_attivazione === 'LeakyReLU'" >
+                <input 
+                    id="alfa" 
+                    type="number" 
+                    tabindex="4" 
+                    inputmode="numeric"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="pendenza"
+                    v-model.number="alfa"
+                    required
+                />
                 <span class="validity"></span>
             </div>
             <img v-if="funz_attivazione !== '' " :src=" 'assets/'+ funz_attivazione + '.png' " alt="" width="auto" height="50" />
@@ -73,9 +102,11 @@ app.component('crea-rete', {
       `,
       data(){
         return {
-            strati: 0,
+            strati: NaN,
+            apprendimento: NaN,
             funz_attivazione:'',
-            connessioni: []
+            connessioni: [],
+            alfa: 0.01
         }
       },
       methods:{
@@ -92,9 +123,10 @@ app.component('crea-rete', {
             this.$emit(
                 'nuova-rete',
                 {
-                    nr_strati : this.strati,
+                    tasso_apprendimento : this.apprendimento,
                     tipo_funz_attivazione: this.funz_attivazione,
                     neuroni: this.connessioni,
+                    alfa: this.alfa
                 }
             )
             // [todo] fare qualcosa dopo l'invio....
