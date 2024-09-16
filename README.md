@@ -1,9 +1,11 @@
 # GUI per testare Reti Neurali MLP
 
-## Tauri (Rust) + Vanilla (Vue.js)
+## Tauri (Rust) + Vanilla (CDN Vue.js)
 
 ### Front-end:  Vue.js
+- /src 
 ### Back-End:   Rust
+- /src-tauri
 
 This template should help get you started developing with Tauri in vanilla HTML, CSS and Javascript.
 
