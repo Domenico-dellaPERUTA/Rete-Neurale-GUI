@@ -63,7 +63,8 @@ h1 {
 
 input,
 select,
-button {
+button,
+textarea {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -80,6 +81,7 @@ button[type="submit"]{
   font-size: 1.25em;
   width: 20rem;
   position: relative;
+  margin: 0.25rem;
 }
 
 button[type="submit"] embed{
@@ -188,4 +190,24 @@ input:valid + span::after {
   margin: 10px; /* Spazio tra le colonne */
   padding: 20px;
   background-color: rgba(211, 211, 211, 0.057);
+}
+
+
+body{
+  margin-top: 0 !important;
+}
+#app{
+  margin-top: 0;
+}
+
+nav {
+  margin: 0;
+  top: -1rem;
+}
+
+nav button {
+  padding-left: 3rem;
+  padding-right: 3rem;
+  border-radius: 0;
+  margin: 0;
 }

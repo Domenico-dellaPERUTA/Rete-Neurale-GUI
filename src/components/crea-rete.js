@@ -95,6 +95,7 @@ app.component('crea-rete', {
                 <rete-neurale  :strati="getRete()"></rete-neurale>
             </div>
         </div>
+        
         <button  required type="submit">
             <embed width="30" height="30" src="assets/create-icon.svg" />Crea
         </button>

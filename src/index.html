@@ -15,14 +15,21 @@
 
   <body>
     <div id="app">
-      <div class="nav-bar"></div>
+      <nav style="display: inline-block;">
+        <button id="button-crea"     disabled="false" onclick="onOpenCreate" >Crea</button>
+        <button id="button-addestra" disabled="false" onclick="onOpenCreate" >Addestra</button>
+        <button id="button-esegui"   disabled="false" onclick="onOpenCreate" >Esegui</button>
+      </nav>
+      <h1 style="display: inline-block; width: 40rem;">{{ titolo }}</h1>
 
       <div class="container">
 
-        <h1>{{ titolo }}</h1>
+        
         <crea-rete @nuova-rete="creaRete"></crea-rete>
   
-        <p>{{ messaggio }}</p>
+        <textarea style="margin: 0.5rem; color:aquamarine; background-color: #0f0f0f98;" rows="20" cols="50">
+          {{ messaggio }}
+        </textarea>
       </div>
     </div>
 
