@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css" />
     <script src="vue.global.min.js"></script>
+    <script src="three.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
    
     <title>Tauri App</title>
@@ -16,18 +17,19 @@
   <body>
     <div id="app">
       <nav style="display: inline-block;">
-        <button id="button-crea"     disabled="false" onclick="onOpenCreate" >Crea</button>
-        <button id="button-addestra" disabled="false" onclick="onOpenCreate" >Addestra</button>
-        <button id="button-esegui"   disabled="false" onclick="onOpenCreate" >Esegui</button>
+        <button id="button-home"     :disabled="false"     @click="step = 0" >⌂</button>
+        <button id="button-crea"     :disabled="step <= 0" @click="step = 1" >Crea</button>
+        <button id="button-addestra" :disabled="step <= 1" @click="step = 2" >Addestra</button>
+        <button id="button-esegui"   :disabled="step <= 2" @click="step = 3" >Esegui</button>
       </nav>
       <h1 style="display: inline-block; width: 40rem;">{{ titolo }}</h1>
 
       <div class="container">
-
         
-        <crea-rete @nuova-rete="creaRete"></crea-rete>
+        <sfondo @go="start" v-if="step == 0" ></sfondo>
+        <crea-rete v-if="step == 1" @nuova-rete="creaRete"></crea-rete>
   
-        <textarea style="margin: 0.5rem; color:aquamarine; background-color: #0f0f0f98;" rows="20" cols="50">
+        <textarea v-if="step > 0" style="margin: 0.5rem; color:aquamarine; background-color: #0f0f0f98;" rows="20" cols="50">
           {{ messaggio }}
         </textarea>
       </div>
@@ -39,6 +41,7 @@
 
 
   <script src="main.js"></script> <!-- definisce app -->
+  <script src="./components/terra.js"></script><!-- sfondo -->
   <script src="./components/crea-rete.js"></script>
   <script src="./components/rete-neurale.js"></script><!-- diagramma -->
 

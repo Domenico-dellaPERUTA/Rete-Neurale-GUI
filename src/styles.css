@@ -211,3 +211,25 @@ nav button {
   border-radius: 0;
   margin: 0;
 }
+
+
+button:disabled {
+  background-color: #0f0f0f2d;
+  color:#ffffff81;
+  
+}
+
+button:disabled:hover {
+  border: #0f0f0f00;
+}
+
+
+
+button#start{
+  z-index: 1000;
+  position: absolute;
+  top: 40%;
+  left: 45%;
+  padding: 1.5rem;
+  width: 10rem;
+}
