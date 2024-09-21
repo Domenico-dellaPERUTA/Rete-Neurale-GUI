@@ -26,28 +26,25 @@
 
       <div class="container">
         
-        <sfondo @go="start" v-if="step == 0" ></sfondo>
-        <crea-rete v-if="step == 1" @nuova-rete="creaRete"></crea-rete>
-  
+        <sfondo        v-if      = "step == 0" @go="start"            ></sfondo>
+        <crea-rete     v-else-if = "step == 1" @nuova-rete="creaRete" ></crea-rete>
+        <addestra-rete v-else-if = "step == 2" :strati="rete.strati" :pesi="rete.pesi" :info="info"></addestra-rete>
+
         <textarea v-if="step > 0" style="margin: 0.5rem; color:aquamarine; background-color: #0f0f0f98;" rows="20" cols="50">
           {{ messaggio }}
         </textarea>
       </div>
     </div>
 
-   
-    
-  
+    <script src="main.js"></script> <!-- definisce app -->
+    <script src="./components/sfondo.js"></script><!-- sfondo -->
+    <script src="./components/crea-rete.js"></script>
+    <script src="./components/rete-neurale.js"></script><!-- diagramma -->
+    <script src="./components/addestra.js"></script>
 
-
-  <script src="main.js"></script> <!-- definisce app -->
-  <script src="./components/terra.js"></script><!-- sfondo -->
-  <script src="./components/crea-rete.js"></script>
-  <script src="./components/rete-neurale.js"></script><!-- diagramma -->
-
-  <script>
-    const mountendApp = app.mount('#app')
-  </script>
+    <script>
+      const mountendApp = app.mount('#app')
+    </script>
 
   </body>
 </html>

@@ -233,3 +233,94 @@ button#start{
   padding: 1.5rem;
   width: 10rem;
 }
+/***** pannello addestramento *****/
+div#info-rete{
+  display: inline-block;
+  left: 0;
+  vertical-align: top;
+  text-align: left;
+  font-size: 1.2rem;
+  color: rgb(0, 251, 255);
+}
+div#diagramma-rete{
+  width: auto;
+  display: inline-block;
+}
+
+div#tabella-set{
+  width: auto;
+  display: inline-block;
+  vertical-align: top;
+}
+table#tab-set{
+  width: 40rem;
+  display: inline-block;
+}
+
+table#tab-set th,
+span.label{
+  color: #e8e8e8;
+  background-color: rgb(23, 23, 23);
+}
+
+table#tab-set th{
+  width: 18rem;
+}
+
+table#tab-set th.button{
+  width: 4rem;
+}
+table#tab-set td{
+  background-color: color(srgb 0.1647 0.1647 0.1647);
+}
+
+/* dialog */
+
+dialog{
+  border: #24c8db;
+  background-color: rgba(30, 30, 30, 1)
+}
+dialog input[type="button"]{
+  margin: 1rem;
+  margin-bottom: 0.1rem;
+  color:red;
+  font-weight: bold;
+  width: 12rem;
+  height: 3.5rem;
+}
+
+dialog input[type="submit"]{
+  margin: 1rem;
+  margin-bottom: 0.1rem;
+  color: green;
+  font-weight: bold;
+  width: 12rem;
+  height: 3.5rem;
+}
+
+
+.divTableCell{
+  width: 50%;
+}
+.divTable{ display: table; }
+.divTableRow { 
+  display: table-row; 
+}
+.divTableHeading { display: table-header-group;}
+.divTableCell, .divTableHead { display: table-cell;}
+.divTableHeading { display: table-header-group;}
+.divTableFoot { display: table-footer-group;}
+.divTableBody { display: table-row-group;}
+
+.divTableHead{
+  height: 2rem;
+  font-weight: bold;
+  color: white;
+  
+}
+.divTable input {
+  margin-left: 1rem;
+  width: 10rem;
+  margin-bottom: 0.25rem;
+  margin-right: 1rem;
+}

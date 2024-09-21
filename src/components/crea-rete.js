@@ -77,7 +77,10 @@ app.component('crea-rete', {
                 </thead>
                 <tbody>
                 <tr v-for="(item, index) in connessioni">
-                    <th scope="row">strato {{ index }}</th>
+                    <th scope="row">strato {{ index }} 
+                        <span v-if="index == 0" style="color:green;" > [input]</span> 
+                        <span v-if="index == connessioni.length -1" style="color:red;" > [output]</span> 
+                    </th>
                     <td>
                         <input 
                             type="number" 

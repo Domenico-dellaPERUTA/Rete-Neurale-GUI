@@ -385,6 +385,30 @@ impl ReteNeurale {
         Ok(())
     }
 
+    /**
+     * Restituisce i singoli pesi delle connessioni tragli strati della rete neurale.
+     * I pesi sono organizzati come un vettori tridimensionale di varori in virgola mobile.
+     * Puo essere visto come un vettore delle connessioni tragli strati organizzati come matrici.
+     */
+    pub fn pesi_connessioni(&self) -> Vec<Vec<Vec<f64>>> {
+        let mut strati_rete = vec![];
+
+        for strato in &self.strati {
+            let mut connessioni = vec![];
+            for riga in strato.row_iter() {
+                let mut riga_connessioni = riga.iter()
+                    .map(|valore| *valore)
+                    .collect::<Vec<f64>>();
+                connessioni.push(riga_connessioni.clone());
+            }
+            strati_rete.push(connessioni);
+           
+        }
+
+       strati_rete
+    }
+
+
     /// Metodo che inverte una matrice formata come vettore di vettori
     fn trasponi<T: Clone>(matrice: Vec<Vec<T>>) -> Vec<Vec<T>> {
         if matrice.is_empty() {

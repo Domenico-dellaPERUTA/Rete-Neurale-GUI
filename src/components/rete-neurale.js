@@ -72,7 +72,7 @@ app.component('rete-neurale', {
               const ySuccessivo = yOffsetSuccessivo + j * (2 * this.raggioNeurone + spazioVerticale);
 
               // Recupera il peso se è stato fornito, altrimenti colore grigio
-              const peso = this.pesi[indiceStrato]?.[i]?.[j];
+              const peso = this.pesi[indiceStrato]?.[j]?.[i];
               const coloreConnessione = peso !== undefined ? this.getColorePeso(peso) : 'gray';
 
               this.disegnaConnessione(ctx, x, y, x + spazioOrizzontale, ySuccessivo, coloreConnessione);
@@ -97,15 +97,14 @@ app.component('rete-neurale', {
       ctx.stroke();
     },
     getColorePeso(peso) {
-      // Converti il peso in un valore compreso tra -1.0 (rosso), 0.0 (verde) e +1.0 (blu)
-      const valoreNorm = (peso + 1) / 2; // Da [-1, 1] a [0, 1]
-
+      
       // Se il valore è vicino a 0, tendi al verde
-      const r = Math.floor(255 * (1 - Math.abs(peso))); // Riduce il rosso e blu quando ci avviciniamo a 0
-      const g = Math.floor(255 * (1 - Math.abs(peso))); // Verde massimo a 0
-      const b = Math.floor(255 * (peso > 0 ? valoreNorm : 0)); // Più blu per valori positivi
+       // Converti il peso in un valore compreso tra -1.0 (rosso) e +1.0 (blu)
+       const valoreNorm = (peso + 1) / 2; // Da [-1, 1] a [0, 1]
+       const r = Math.floor(255 * (1 - valoreNorm)); // Rosso per valori negativi
+       const g = Math.floor(255 * valoreNorm); // Verde per valori positivi
+       return `rgb(${r}, ${g}, 0)`; // Colore dal rosso al verde
 
-      return `rgb(${r}, ${g}, ${b})`; // Colore che va dal rosso al verde (vicino a 0) e poi al blu
     }
   }
 });
