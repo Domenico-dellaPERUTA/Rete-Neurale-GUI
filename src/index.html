@@ -28,7 +28,15 @@
         
         <sfondo        v-if      = "step == 0" @go="start"            ></sfondo>
         <crea-rete     v-else-if = "step == 1" @nuova-rete="creaRete" ></crea-rete>
-        <addestra-rete v-else-if = "step == 2" :strati="rete.strati" :pesi="rete.pesi" :info="info"></addestra-rete>
+        <addestra-rete v-else-if = "step == 2" 
+          :strati="rete.strati" 
+          :pesi="rete.pesi" 
+          :info="info" 
+          @set-addestramento="caricaSet"
+          @addestra="addestraRete"
+          @cicli="cicliAddestramento"
+          >
+        </addestra-rete>
 
         <textarea v-if="step > 0" style="margin: 0.5rem; color:aquamarine; background-color: #0f0f0f98;" rows="20" cols="50">
           {{ messaggio }}

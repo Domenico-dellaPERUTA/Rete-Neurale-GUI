@@ -89,7 +89,20 @@ app.component('addestra-rete', {
                 </tbody>
             </table>
         </div>
-        
+        <template v-if="list_set.length > 0">
+            <button @click="onSalva()" >
+                <embed width="70" height="30" src="assets/upload-icon.svg"/>Carica Set
+            </button>
+            <input
+                type="number" step="1" 
+                min="1" 
+                v-model.number="iter"
+                required/> 
+            <span class="validity"></span> 
+            <button @click="onAddestra()" v-if="iter > 0" required>
+                <embed width="70" height="30" src="assets/teach-icon.svg"/>Addestra
+            </button>
+        <template>
         
     </div>
     `,
@@ -123,7 +136,8 @@ app.component('addestra-rete', {
           current_set : {
             input: [],
             output : []
-          }
+          },
+          iter:0,
         };
       },
       mounted() {
@@ -187,6 +201,13 @@ app.component('addestra-rete', {
                 document.getElementById("dialog").showModal();
             }
             
+        },
+        onSalva(){
+            this.$emit('set-addestramento', this.list_set);
+        },
+        onAddestra(){
+            this.$emit('addestra', this.iter);
+            //this.list_set = [];
         }
 
       }

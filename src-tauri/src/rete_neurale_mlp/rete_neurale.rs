@@ -6,7 +6,7 @@ use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 use std::sync::{Arc, RwLock};
 
 /// Esempio di una semplice coppia di input-output del Set di Addestramento di una Rete Neurale.
-pub struct InputAddestranto {
+pub struct InputAddestramento {
     pub input: Vec<f64>,
     pub output: Vec<f64>
 }
@@ -296,10 +296,10 @@ impl ReteNeurale {
     /// ```
     ///  // usiamo gli stessi dati di addestramento per confronto ...
     ///  let dati_addestramento = [
-    ///     InputAddestranto {input:vec![0.0, 0.0], output: vec![0.0]},
-    ///     InputAddestranto {input:vec![0.0, 1.0], output: vec![1.0]},
-    ///     InputAddestranto {input:vec![1.0, 0.0], output: vec![1.0]},
-    ///     InputAddestranto {input:vec![1.0, 1.0], output: vec![0.0]}
+    ///     InputAddestramento {input:vec![0.0, 0.0], output: vec![0.0]},
+    ///     InputAddestramento {input:vec![0.0, 1.0], output: vec![1.0]},
+    ///     InputAddestramento {input:vec![1.0, 0.0], output: vec![1.0]},
+    ///     InputAddestramento {input:vec![1.0, 1.0], output: vec![0.0]}
     /// ];
     /// for set in dati_addestramento.iter() {
     ///     let uscita = rete.elabora(set.input.clone());
@@ -342,10 +342,10 @@ impl ReteNeurale {
     /// # Esempio
     /// ```
     ///  let dati_addestramento = [
-    ///     InputAddestranto {input:vec![0.0, 0.0], output: vec![0.0]},
-    ///     InputAddestranto {input:vec![0.0, 1.0], output: vec![1.0]},
-    ///     InputAddestranto {input:vec![1.0, 0.0], output: vec![1.0]},
-    ///     InputAddestranto {input:vec![1.0, 1.0], output: vec![0.0]}
+    ///     InputAddestramento {input:vec![0.0, 0.0], output: vec![0.0]},
+    ///     InputAddestramento {input:vec![0.0, 1.0], output: vec![1.0]},
+    ///     InputAddestramento {input:vec![1.0, 0.0], output: vec![1.0]},
+    ///     InputAddestramento {input:vec![1.0, 1.0], output: vec![0.0]}
     /// ];
     /// for _ in 0..1000000 {
     ///     for set in dati_addestramento.iter() {

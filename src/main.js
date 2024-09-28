@@ -48,6 +48,32 @@ const app =Vue.createApp({
     },
     next(){
       this.step++;
+    },
+    
+
+    async caricaSet(infoSet){
+      let index =0;
+      for (const set of infoSet) {
+        set.start=set.end=false;
+
+        if(index == 0){
+          set.start=true;
+        }
+        if(index == infoSet.length -1 ){
+          set.end=true;
+        }
+        const risposta = await invoke("addestra", set);
+        this.messaggio += '\n' + risposta;
+        index++;
+      }
+      //this.next();
+    },
+
+    async addestraRete(cicli){
+      const risposta = await invoke("iter", {nr: cicli});
+      this.messaggio  = risposta[0];
+      this.rete.pesi = risposta[1];
+      this.next();
     }
   }
 })
