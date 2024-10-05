@@ -37,6 +37,13 @@
           @cicli="cicliAddestramento"
           >
         </addestra-rete>
+        <esegui-rete v-else-if = "step == 3"
+          :strati="rete.strati" 
+          :pesi="rete.pesi"
+          @run="runTest"
+          :result="output"
+          >
+        </esegui-rete>
 
         <textarea v-if="step > 0" style="margin: 0.5rem; color:aquamarine; background-color: #0f0f0f98;" rows="20" cols="50">
           {{ messaggio }}
@@ -49,6 +56,7 @@
     <script src="./components/crea-rete.js"></script>
     <script src="./components/rete-neurale.js"></script><!-- diagramma -->
     <script src="./components/addestra.js"></script>
+    <script src="./components/esegui.js"></script>
 
     <script>
       const mountendApp = app.mount('#app')

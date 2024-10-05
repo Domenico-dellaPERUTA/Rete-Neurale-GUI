@@ -1,3 +1,4 @@
+// /* 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -59,12 +60,11 @@ fn addestra(id: usize, input: Vec<f64>, output: Vec<f64>, start: bool, end: bool
 #[tauri::command]
 fn iter(nr: usize) -> (String, Vec<Vec<Vec<f64>>>) {
 
-    // Controllo sicuro sulla rete
-    let rete_option = RETE.write().unwrap().as_ref().cloned();
+    let mut rete_option = RETE.write().unwrap();
 
     let  input_addestramento = INPUT_ADDESTRAMENTO.write().unwrap();
     
-    if let Some(mut rete) = rete_option {
+    if let Some(rete) = rete_option.as_mut() {
         
         // Addestramento della rete neurale
         for _ in 0..nr {
@@ -72,6 +72,7 @@ fn iter(nr: usize) -> (String, Vec<Vec<Vec<f64>>>) {
                 rete.addestra(set.input.clone(), set.output.clone());
             }
         }
+        
         return  (format!("Rete neurale addestrata: {}", rete), rete.pesi_connessioni());
     } else {
         ("Errore: rete neurale non inizializzata".to_string(), vec![vec![vec![]]])
@@ -79,9 +80,24 @@ fn iter(nr: usize) -> (String, Vec<Vec<Vec<f64>>>) {
     
 }
 
+#[tauri::command]
+fn run(input: Vec<f64>) ->  (String,Vec<f64>) {
+    
+    let rete_option = RETE.write().unwrap();
+    if let Some(rete) = rete_option.as_ref() {
+        
+        let output = rete.elabora(input);
+       
+        (format!("Output rete: {:?}\nrete\n{}", output.clone(),rete), output)
+    } else {
+        ("Errore: rete neurale non inizializzata".to_string(), vec![])
+    }
+}
+
 fn main() {
+    println!("----------------");
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter])
+        .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter,run])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

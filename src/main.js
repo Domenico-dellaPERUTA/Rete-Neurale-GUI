@@ -20,7 +20,8 @@ const app =Vue.createApp({
         funzione_attivazione: "",
         tasso_apprendimento: 0,
         coeff_alfa: 0
-      }
+      },
+      output: []
 
     }
   },
@@ -74,6 +75,12 @@ const app =Vue.createApp({
       this.messaggio  = risposta[0];
       this.rete.pesi = risposta[1];
       this.next();
+    },
+
+    async runTest(input){
+      const response = await invoke("run", {input: input});
+      this.output = response[1];
+      this.messaggio = response[0];
     }
   }
 })
