@@ -3,7 +3,12 @@ use rand::Rng;
 use std::fmt::{Display,Debug, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+
+const _FILE_INFO_RETE :          &str = "[#] ";
+const _FILE_INFO_APPRENDIMENTO:  &str = "[+] ";
+const _FILE_INFO_ATTIVAZIONE:    &str = "[*] ";
+const _FILE_STRATO:              &str = "---";
 
 /// Esempio di una semplice coppia di input-output del Set di Addestramento di una Rete Neurale.
 pub struct InputAddestramento {
@@ -13,7 +18,7 @@ pub struct InputAddestramento {
 
 /// Trait per le funzioni di attivazione generiche.
 /// Le funzioni di attivazione devono implementare questi metodi.
-pub trait FunzioneAttivazione: FunzioneAttivazioneClone + Send + Sync  {
+pub trait FunzioneAttivazione  {
     /// Calcola il valore della funzione di attivazione.
     ///
     /// # Argomenti
@@ -38,27 +43,12 @@ pub trait FunzioneAttivazione: FunzioneAttivazioneClone + Send + Sync  {
 
     /// Metodo per ottenere il nome della funzione di attivazione
     fn nome(&self) -> &str;
+    ///  Metodo per ottenere il nome della funzione di attivazione abbreviato
+    fn sigla(&self) -> &str;
+    /// Parametro opzionale
+    fn alfa(&self) -> f64;
 }
 
-/// Implementazione del metoto per poter utilizzare parametri dinamico Box<dyn ... >
-trait FunzioneAttivazioneClone {
-    fn clone_box(&self) -> Box<dyn FunzioneAttivazione>;
-}
-
-impl<T> FunzioneAttivazioneClone for T
-where
-    T: 'static + FunzioneAttivazione + Clone,
-{
-    fn clone_box(&self) -> Box<dyn FunzioneAttivazione> {
-        Box::new(self.clone())
-    }
-}
-
-impl Clone for Box<dyn FunzioneAttivazione> {
-    fn clone(&self) -> Box<dyn FunzioneAttivazione> {
-        self.clone_box()
-    }
-}
 
 /// Implementazione della funzione Sigmoide.
 /// La sigmoide è una funzione di attivazione comune che mappa i valori in un intervallo tra 0 e 1.
@@ -76,6 +66,12 @@ impl FunzioneAttivazione for Sigmoide {
     }
     fn nome(&self) -> &str {
         "Sigmoide"
+    }
+    fn sigla(&self) -> &str {
+        "Sigmoide"
+    }
+    fn alfa(&self) -> f64 {
+        0.0
     }
 }
 
@@ -98,6 +94,12 @@ impl FunzioneAttivazione for ReLU {
     }
     fn nome(&self) -> &str {
         "Rectified Linear Unit"
+    }
+    fn sigla(&self) -> &str {
+        "ReLU"
+    }
+    fn alfa(&self) -> f64 {
+        0.0
     }
 }
 
@@ -129,6 +131,12 @@ impl FunzioneAttivazione for LeakyReLU {
     fn nome(&self) -> &str {
         "Leaky Rectified Linear Unit"
     }
+    fn sigla(&self) -> &str {
+        "LeakyReLU"
+    }
+    fn alfa(&self) -> f64 {
+        self.alpha
+    }
 }
 
 /// Implementazione della funzione tanh (Tangente Iperbolica).
@@ -148,6 +156,12 @@ impl FunzioneAttivazione for Tanh {
     fn nome(&self) -> &str {
         "Tangente Iperbolica"
     }
+    fn sigla(&self) -> &str {
+        "Tanh"
+    }
+    fn alfa(&self) -> f64 {
+        0.0
+    }
 }
 
 /// Implementazione della funzione Softplus.
@@ -165,6 +179,12 @@ impl FunzioneAttivazione for Softplus {
     }
     fn nome(&self) -> &str {
         "Softplus"
+    }
+    fn sigla(&self) -> &str {
+        "Softplus"
+    }
+    fn alfa(&self) -> f64 {
+        0.0
     }
 }
 
@@ -185,6 +205,12 @@ impl FunzioneAttivazione for Swish {
     fn nome(&self) -> &str {
         "Swish"
     }
+    fn sigla(&self) -> &str {
+        "Swish"
+    }
+    fn alfa(&self) -> f64 {
+        0.0
+    }
 }
 
 /*
@@ -198,7 +224,8 @@ impl FunzioneAttivazione for Swish {
 pub struct ReteNeurale {
     strati: Vec<DMatrix<f64>>,          // I pesi di ogni strato (organizzati come connessioni tra i livelli)
     funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync>,            // La funzione di attivazione
-    tasso_apprendimento: f64            // Il tasso di apprendimentox
+    tasso_apprendimento: f64 ,           // Il tasso di apprendimentox,
+    dimensioni_strati:Vec<usize>
 }
 
 /// Permette la stampa della rete
@@ -257,8 +284,17 @@ impl ReteNeurale {
         ReteNeurale {
             strati,
             funzione_attivazione,
-            tasso_apprendimento
+            tasso_apprendimento,
+            dimensioni_strati
         }
+    }
+
+    /// Crea una rete da un file contiene i pesi e le informazioni della rete, da un file txt precedentemente creato.
+    /// 
+    pub fn carica(file_txt: &str) -> Self {
+        let mut rete = Self::nuova(vec![0], 0.0, Arc::new(Sigmoide));
+        rete.carica_pesi_txt(file_txt).unwrap();
+        rete
     }
 
     /// Propagazione in avanti attraverso la rete.
@@ -370,8 +406,17 @@ impl ReteNeurale {
     /// Un `Result` che indica se l'operazione ha avuto successo o meno.
     pub fn salva_pesi_txt(&self, file_path: &str) -> Result<(), Error> {
         let mut file = File::create(file_path)?;
+        writeln!( file, "{} {}",_FILE_INFO_APPRENDIMENTO, self.tasso_apprendimento )?;
+        writeln!( file, "{} {}{}",
+            _FILE_INFO_ATTIVAZIONE, self.funzione_attivazione.sigla(), 
+            if self.funzione_attivazione.sigla() == "LeakyReLU" { format!(" {}",self.funzione_attivazione.alfa()) } else {"".to_string()} )?;
+        writeln!( file, "{} {}", 
+            _FILE_INFO_RETE, 
+            format!("{:?}", self.dimensioni_strati ).replace("[", "").replace("]", "")
+        )?;
 
         for strato in &self.strati {
+            
             for riga in strato.row_iter() {
                 let riga_str = riga.iter()
                     .map(|valore| valore.to_string())
@@ -379,7 +424,7 @@ impl ReteNeurale {
                     .join(" ");
                 writeln!(file, "{}", riga_str)?;
             }
-            writeln!(file, "---")?; // Separatore di strato
+            writeln!(file, "{}", _FILE_STRATO )?; // Separatore di strato
         }
 
         Ok(())
@@ -415,7 +460,7 @@ impl ReteNeurale {
             return vec![]; // Se la matrice è vuota, ritorna una matrice vuota.
         }
     
-        let numero_righe = matrice.len();
+        let _numero_righe = matrice.len();
         let numero_colonne = matrice[0].len();
     
         // Creiamo una nuova matrice trasposta con colonne vuote.
@@ -448,10 +493,45 @@ impl ReteNeurale {
         let mut strati = Vec::new();
         let mut attuale_strato:Vec<Vec<f64>> = Vec::new();
         
-
+        
         for line in reader.lines() {
             let linea = line?;
-            if linea.trim() == "---" {
+            
+            if linea.starts_with(_FILE_INFO_APPRENDIMENTO) {
+                let tasso = linea.replace(_FILE_INFO_APPRENDIMENTO, "")
+                                    .split(" ")
+                                    .collect::<Vec<&str>>().get(1).unwrap()
+                                    .to_string().parse::<f64>().unwrap();
+                if tasso > 0.0 {
+                     self.tasso_apprendimento = tasso;
+                }
+            } else if linea.starts_with(_FILE_INFO_ATTIVAZIONE) {
+                let nome_funzione = linea.replace(_FILE_INFO_ATTIVAZIONE, "").trim().to_string();
+
+                self.funzione_attivazione = if nome_funzione.starts_with("LeakyReLU") {
+                    let alfa = nome_funzione.replace("LeakyReLU", "").trim().to_string().parse::<f64>().unwrap();
+                    Arc::new(LeakyReLU { alpha: alfa })
+                } else {
+                    match nome_funzione.as_str() {
+                        "Sigmoide"  => Arc::new(Sigmoide),
+                        "ReLU"      => Arc::new(ReLU),
+                        "Tanh"      => Arc::new(Tanh),
+                        "Softplus"  => Arc::new(Softplus),
+                        "Swish"     => Arc::new(Swish),
+                        _           => Arc::new(Sigmoide),
+                    }
+                }
+                
+                
+            } else if linea.starts_with(_FILE_INFO_RETE) {
+                let strati = linea.replace(_FILE_INFO_RETE, "").trim()
+                        .split(", ")
+                        .map( |cifra| cifra.to_string().parse::<usize>().unwrap() )
+                        .collect::<Vec<usize>>();
+                if strati.len() > 0 {
+                    Self::nuova(strati, self.tasso_apprendimento, self.funzione_attivazione.clone());
+                }
+            } else if linea.trim() == _FILE_STRATO {
                 let num_righe = attuale_strato.len();
                 let connessioni =attuale_strato.get(0);
                 let mut num_colonne: usize=0;
