@@ -1,4 +1,4 @@
-/* 
+// /* 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -95,15 +95,14 @@ fn run(input: Vec<f64>) ->  (String,Vec<f64>) {
 }
 
 fn main() {
-    println!("----------------");
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter,run])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
- */
+// */
 
-// /* 
+ /* 
 mod rete_neurale_mlp;
 use std::{sync::Arc, time::Instant};
 
