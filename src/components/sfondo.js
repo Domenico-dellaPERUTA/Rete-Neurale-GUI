@@ -1,10 +1,12 @@
+
 app.component('sfondo', {
   template: 
   /*html*/
   ` <canvas id="nokey" width="800" height="600">
         Il tuo Browser non supporta Canvar :/
     </canvas>
-    <button @click="onClick"  id="start">GO</button>
+    <button  id="start" @click="onClick">Nuova Rete</button>
+    <button id="upload" @click="selectFile">Carica Rete</button>
   ` ,
   data() {
     return {
@@ -24,8 +26,29 @@ app.component('sfondo', {
             'go',
             true
         )
-        
     },
+    async selectFile() {
+
+        const dialog  = window.__TAURI__.dialog;
+        const fs = window.__TAURI__.fs;
+        try {
+          // Apri una finestra di dialogo per selezionare un file
+          const selectedFilePath = await dialog.open({
+            filters: [{ name: 'Text Files', extensions: ['txt'] }],
+          });
+  
+          if (selectedFilePath) {
+            const fileContent = await fs.readTextFile(selectedFilePath); // Leggi il contenuto del file
+            this.$emit('file', {
+                name: selectedFilePath,
+                content: fileContent
+            })
+          }
+        } catch (error) {
+          console.error('Error selecting file:', error);
+        }
+    },
+      
     initScene() {
         var canvas = document.getElementById('nokey'),
         can_w = parseInt(canvas.getAttribute('width')),

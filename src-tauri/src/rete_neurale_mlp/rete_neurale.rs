@@ -529,7 +529,8 @@ impl ReteNeurale {
                         .map( |cifra| cifra.to_string().parse::<usize>().unwrap() )
                         .collect::<Vec<usize>>();
                 if strati.len() > 0 {
-                    Self::nuova(strati, self.tasso_apprendimento, self.funzione_attivazione.clone());
+                    self.dimensioni_strati = strati;
+                    Self::nuova(self.dimensioni_strati.clone(), self.tasso_apprendimento, self.funzione_attivazione.clone());
                 }
             } else if linea.trim() == _FILE_STRATO {
                 let num_righe = attuale_strato.len();
@@ -560,5 +561,21 @@ impl ReteNeurale {
         self.strati = strati;
         Ok(())
     }
+
+    /// Dimensione dei vari strati.
+    pub fn strati (&self) ->  Vec<usize> {
+        self.dimensioni_strati.to_vec()
+    }
+
+    /// Nome della funzione di attivazione
+    pub fn funzione_attivazione (&self) ->  &str {
+        self.funzione_attivazione.nome()
+    }
+
+    pub fn tasso_apprendimento (&self) ->  f64 {
+        self.tasso_apprendimento
+    }
+
+
 }
 

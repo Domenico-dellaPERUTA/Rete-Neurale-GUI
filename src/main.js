@@ -1,5 +1,6 @@
 const { invoke } = window.__TAURI__.tauri;
 
+
 let oInputStrati;
 let oSelectFunzAttivazione;
 let oMessage;
@@ -44,6 +45,23 @@ const app =Vue.createApp({
 
       this.next();
     },
+    async caricaRete(file){
+      const risposta = await invoke("carica_rete", { 
+        nome: file.name, 
+        file: file.content
+      });
+      this.messaggio = 'FILE :'+
+                      '\n=======================================================================\n'+
+                        risposta[0].replaceAll("\\n","\n").replaceAll("\"","")+
+                      "\n=======================================================================\n";
+      this.rete.pesi = risposta[1];
+      this.rete.strati = risposta[2];
+      this.info.funzione_attivazione = risposta[3];
+      this.info.tasso_apprendimento = risposta[4];
+
+      this.step = 3;
+    },
+
     async start(go){
       if(go)this.step++;
     },

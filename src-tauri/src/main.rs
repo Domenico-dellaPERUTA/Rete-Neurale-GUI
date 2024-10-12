@@ -1,10 +1,10 @@
 // /* 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 mod rete_neurale_mlp;
 use std::sync::{Arc, RwLock};
-
+use std::fs::File;
+use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 use crate::rete_neurale_mlp::rete_neurale::*;
 
 // Uso di RETE come un Arc per rendere il puntatore thread-safe
@@ -94,9 +94,32 @@ fn run(input: Vec<f64>) ->  (String,Vec<f64>) {
     }
 }
 
+#[tauri::command]
+fn carica_rete(nome: String, file: String) -> (String, Vec<Vec<Vec<f64>>>,Vec<usize>, String, f64)  {
+      // Crea una nuova rete neurale usando Arc per la funzione di attivazione
+    let rete = ReteNeurale::carica(nome.as_str());
+
+    // Scrivi la nuova rete neurale all'interno di RETE
+    let mut rete_guard = RETE.write().unwrap();
+    *rete_guard = Some(rete);
+
+    // Restituisci una stringa descrittiva e i pesi della rete
+    if let Some(rete) = rete_guard.as_ref() {
+        ( 
+            format!("{file:?}").to_string(), // messaggio
+            rete.pesi_connessioni(), // pesi
+            rete.strati(),
+            rete.funzione_attivazione().to_string(),
+            rete.tasso_apprendimento()
+        )
+    } else {
+        ("Errore: rete neurale non creata".to_string(), vec![vec![vec![]]], vec![], "".to_string(), 0.0)
+    }
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter,run])
+        .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter,run,carica_rete])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

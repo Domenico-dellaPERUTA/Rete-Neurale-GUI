@@ -230,11 +230,22 @@ button:disabled:hover {
 button#start{
   z-index: 1000;
   position: absolute;
-  top: 40%;
+  top: 30%;
   left: 45%;
+  right: 45%;
   padding: 1.5rem;
-  width: 10rem;
+  width: auto;
 }
+#upload{
+  z-index: 1000;
+  position: absolute;
+  top: 45%;
+  left: 45%;
+  right: 45%;
+  padding: 1.5rem;
+  width: auto;
+}
+
 /***** pannello addestramento *****/
 div#info-rete{
   display: inline-block;

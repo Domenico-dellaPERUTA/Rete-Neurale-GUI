@@ -26,7 +26,7 @@
 
       <div class="container">
         
-        <sfondo        v-if      = "step == 0" @go="start"            ></sfondo>
+        <sfondo        v-if      = "step == 0" @go="start" @file="caricaRete"></sfondo>
         <crea-rete     v-else-if = "step == 1" @nuova-rete="creaRete" ></crea-rete>
         <addestra-rete v-else-if = "step == 2" 
           :strati="rete.strati" 
