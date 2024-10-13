@@ -46,6 +46,56 @@ app.component('esegui-rete', {
             </div>
             
         </div>
+        <div>
+            <button id="download" @click="apriDialogSalva">Salva Rete</button>
+            <dialog id="dialogSalva">
+                <form id="formSave" method="dialog" @submit.prevent="onSalvaFile" >
+                <div class="title"> Salvataggio </div>
+                       
+                    <div class="divTable">
+                        <div class="divTableBody">
+                            <div class="divTableRow">
+                                <div class="divTableCellMin">
+                                <button @click="cercaCartella()" >Cerca 🔍 </button>
+                                </div> 
+                                <div class="divTableCellMax">
+                                    <input 
+                                        id="path" 
+                                        v-model="file.path"
+                                        placeholder="percorso ..."
+                                        required/> 
+                                    <span class="validity"></span> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divTableBody">
+                            <div class="divTableRow">
+                                <div class="divTableCellMin">
+                                    
+                                </div> 
+                                <div class="divTableCellMax">
+                                    <input 
+                                        id="file" 
+                                        placeholder="nome file ..."
+                                        v-model="file.name"
+                                        required/> 
+                                    <span class="validity"></span> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <input 
+                            type="button" 
+                            @click="chiudiDialogSalva()" 
+                            value="Chiudi" />
+                        <input 
+                            type="submit" 
+                            value="Salva" />
+                    </div>
+                </form>
+            </dialog>
+        </div>
     </div>
     `,
     props: {
@@ -71,7 +121,11 @@ app.component('esegui-rete', {
           nr_output: 0,
           max_row: 0,
           input: [],
-          output: []
+          output: [],
+          file : {
+            name: '',
+            path: ''
+          },
         };
     },
     mounted() {
@@ -109,7 +163,58 @@ app.component('esegui-rete', {
                     this.output[i] = this.result[i];
                     
                 }
-        }
+        },
 
+        apriDialogSalva(){
+            document.getElementById("dialogSalva").showModal();
+            this.file = {
+                name: '',
+                path: ''
+            };
+        },
+
+        chiudiDialogSalva(){
+            document.getElementById("dialogSalva").close();
+        },
+        
+        _requiredForm(){
+            this.file = {
+                name: '',
+                path: ''
+            };
+        },
+        
+        async cercaCartella() {
+            try {
+                const dialog  = window.__TAURI__.dialog;
+
+                // Usa Tauri per aprire una finestra di dialogo per selezionare la cartella
+                const selectedFolderPath = await dialog.open({
+                    directory: true, // Permette la selezione delle cartelle
+                });
+
+                if (selectedFolderPath) {
+                    this.file.path = selectedFolderPath; // Imposta il percorso della cartella
+                }
+            } catch (error) {
+                this._requiredForm();
+            }
+        },
+
+        async onSalvaFile() {
+            try {
+                if (this.file.path && this.file.name) {
+                    // Crea il percorso completo per salvare il file
+                    const saveFilePath = `${this.file.path}/${this.file.name.split('.txt')[0]}.txt`;
+                    if(saveFilePath){
+                        // Scrive il contenuto modificato nel file nella nuova cartella
+                        this.$emit('save',  saveFilePath);
+                        this. chiudiDialogSalva();
+                    }
+                }
+            } catch (error) {
+                this._requiredForm();
+            }
+        }
     }
 });

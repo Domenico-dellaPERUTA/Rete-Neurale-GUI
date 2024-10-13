@@ -154,6 +154,14 @@ input#nr_strati {
   width: 6rem;
 }
 
+input#path{
+  width: 20rem;
+}
+
+input#file{
+  width: 15rem;
+}
+
 input[type="number"] {
   width: 6rem;
 }
@@ -271,7 +279,7 @@ table#tab-set{
 }
 
 table#tab-set th,
-span.label{
+span.label, label{
   color: #e8e8e8;
   background-color: rgb(23, 23, 23);
 }
@@ -320,7 +328,7 @@ dialog input[type="submit"]{
   display: table-row; 
 }
 .divTableHeading { display: table-header-group;}
-.divTableCell, .divTableHead { display: table-cell;}
+.divTableCell,.divTableCellMin,.divTableCellMax, .divTableHead { display: table-cell;}
 .divTableHeading { display: table-header-group;}
 .divTableFoot { display: table-footer-group;}
 .divTableBody { display: table-row-group;}
@@ -336,6 +344,13 @@ dialog input[type="submit"]{
   width: 10rem;
   margin-bottom: 0.25rem;
   margin-right: 1rem;
+}
+
+.divTableCellMin{
+  width: 20%;
+}
+.divTableCellMax{
+  width: 80%;
 }
 
 /* esegue */
@@ -354,3 +369,10 @@ div#input-rete {
   text-align: left;
 }
 
+form .title {
+  margin-bottom: 1.3rem;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  font-size: 1.3rem;
+}

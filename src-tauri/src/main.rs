@@ -5,6 +5,8 @@ mod rete_neurale_mlp;
 use std::sync::{Arc, RwLock};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
+use tauri::http::status;
+
 use crate::rete_neurale_mlp::rete_neurale::*;
 
 // Uso di RETE come un Arc per rendere il puntatore thread-safe
@@ -117,9 +119,26 @@ fn carica_rete(nome: String, file: String) -> (String, Vec<Vec<Vec<f64>>>,Vec<us
     }
 }
 
+#[tauri::command]
+fn save(file: String) -> String  {
+
+   let rete_option = RETE.write().unwrap();
+    if let Some(rete) = rete_option.as_ref() {
+        
+        if let Ok(_status) = rete.salva_pesi_txt(file.as_str()) {
+            format!("Salvataggio file: '{file}'")
+        }else{
+            format!("Errore salvataggio file: '{file}'")
+        }
+        
+    } else {
+        "Errore: rete neurale non inizializzata".to_string()
+    }
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter,run,carica_rete])
+        .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter,run,carica_rete,save])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

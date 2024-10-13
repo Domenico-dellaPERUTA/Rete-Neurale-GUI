@@ -99,6 +99,11 @@ const app =Vue.createApp({
       const response = await invoke("run", {input: input});
       this.output = response[1];
       this.messaggio = response[0];
+    },
+
+    async saveNetwork(filename){
+      const response = await invoke("save", {file: filename});
+      this.messaggio = response;
     }
   }
 })
