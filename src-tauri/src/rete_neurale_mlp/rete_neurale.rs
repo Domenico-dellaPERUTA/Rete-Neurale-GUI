@@ -3,6 +3,7 @@ use rand::Rng;
 use std::fmt::{Display,Debug, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
+use std::str::FromStr;
 use std::sync::Arc;
 
 const _FILE_INFO_RETE :          &str = "[#] ";
@@ -10,10 +11,15 @@ const _FILE_INFO_APPRENDIMENTO:  &str = "[+] ";
 const _FILE_INFO_ATTIVAZIONE:    &str = "[*] ";
 const _FILE_STRATO:              &str = "---";
 
-/// Esempio di una semplice coppia di input-output del Set di Addestramento di una Rete Neurale.
+/// Coppia di input-output del Set di Addestramento di una Rete Neurale.
 pub struct InputAddestramento {
     pub input: Vec<f64>,
     pub output: Vec<f64>
+}
+/// Informazioni relative al numero di neuroni e alla funzione di ativazione di uno strato.
+pub struct Strato {
+    pub neuroni: usize,
+    pub funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync>
 }
 
 /// Trait per le funzioni di attivazione generiche.
@@ -223,7 +229,7 @@ impl FunzioneAttivazione for Swish {
 #[derive(Clone)]
 pub struct ReteNeurale {
     strati: Vec<DMatrix<f64>>,          // I pesi di ogni strato (organizzati come connessioni tra i livelli)
-    funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync>,            // La funzione di attivazione
+    funzioni_attivazione: Vec<Arc<dyn FunzioneAttivazione + Send + Sync>>,  // Le funzioni di attivazione in ordine per strati
     tasso_apprendimento: f64 ,           // Il tasso di apprendimentox,
     dimensioni_strati:Vec<usize>
 }
@@ -238,7 +244,12 @@ impl Display for ReteNeurale {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         let mut testo = String::new();
         testo += "Pesi Rete Neurale MLP\n";
-        testo += format!("Funzione di attivazione: {}\n", self.funzione_attivazione.nome()).as_str(); // Stampa il nome della funzione di attivazione
+        let mut nomi_funz_attivazione = String::new();
+        
+        for funzione_attivazione in self.funzioni_attivazione.clone().into_iter()  {
+            nomi_funz_attivazione += &(funzione_attivazione.nome().to_string()+ "; ");
+        }
+        testo += format!("Funzioni di attivazione per livello: {:?}\n", nomi_funz_attivazione).as_str(); // Stampa il nome della funzione di attivazione
 
         let mut i = 0;
         for strato in &self.strati {
@@ -268,10 +279,10 @@ impl ReteNeurale {
     /// 
     /// * `tasso_apprendimento` - Il tasso di apprendimento per l'algoritmo di backpropagation.
     /// * `funzione_attivazione` - La funzione di attivazione da utilizzare nella rete.
-    pub fn nuova(
+    pub fn nuova_rete_uniforme(
         dimensioni_strati: Vec<usize>,
         tasso_apprendimento: f64,
-        funzione_attivazione:Arc<dyn FunzioneAttivazione + Send + Sync>,
+        funzione_attivazione:Arc<dyn FunzioneAttivazione + Send + Sync>
     ) -> Self {
         let mut rng = rand::thread_rng();
         let mut strati = Vec::with_capacity(dimensioni_strati.len() - 1);
@@ -280,19 +291,55 @@ impl ReteNeurale {
             let pesi = DMatrix::from_fn(dimensioni_strati[i + 1], dimensioni_strati[i], |_, _| rng.gen_range(-1.0..1.0));
             strati.push(pesi);
         }
-
+        let funzioni_attivazione = vec![funzione_attivazione];
         ReteNeurale {
             strati,
-            funzione_attivazione,
+            funzioni_attivazione,
             tasso_apprendimento,
             dimensioni_strati
         }
     }
 
+    /// Crea una nuova rete neurale con il numero di livelli nascosti specificato.
+    ///
+    /// # Argomenti
+    ///
+    /// * `dimensioni_strati` - Un vettore che specifica il numero di neuroni in ogni strato, incluso input e output.
+    /// 
+    ///     Esempio:
+    ///       let dimensioni_strati = vec![2, 3, 2, 1];  // Input, due livelli nascosti, output
+    /// 
+    /// * `tasso_apprendimento` - Il tasso di apprendimento per l'algoritmo di backpropagation.
+    /// * `funzioni_attivazione` - Lista delle funzioni di attivazione per singoli strati.
+    /// 
+    pub fn nuova( info_strati: Vec<Strato>, tasso_apprendimento: f64 ) -> Self {
+        let mut funzioni_attivazione = Vec::new();
+        let mut dimensioni_strati= Vec::new();
+        for info_strato in info_strati.into_iter() {
+            dimensioni_strati.push(info_strato.neuroni);
+            funzioni_attivazione.push(info_strato.funzione_attivazione);
+        }
+        let mut rng = rand::thread_rng();
+        let mut strati = Vec::with_capacity(dimensioni_strati.len() - 1);
+
+        for i in 0..dimensioni_strati.len() - 1 {
+            let pesi = DMatrix::from_fn(dimensioni_strati[i + 1], dimensioni_strati[i], |_, _| rng.gen_range(-1.0..1.0));
+            strati.push(pesi);
+        }
+        
+        ReteNeurale {
+            strati,
+            funzioni_attivazione,
+            tasso_apprendimento,
+            dimensioni_strati
+        }
+    }
+
+
     /// Crea una rete da un file contiene i pesi e le informazioni della rete, da un file txt precedentemente creato.
     /// 
     pub fn carica(file_txt: &str) -> Self {
-        let mut rete = Self::nuova(vec![0], 0.0, Arc::new(Sigmoide));
+        let mut rete = Self::nuova_rete_uniforme(vec![0], 0.0, Arc::new(Sigmoide));
         rete.carica_pesi_txt(file_txt).unwrap();
         rete
     }
@@ -310,11 +357,19 @@ impl ReteNeurale {
         let mut uscite = Vec::with_capacity(self.strati.len() + 1);
         let mut attivazione_corrente = input.clone();
         uscite.push(attivazione_corrente.clone());
-
+        let mut i=0;
         for pesi in &self.strati {
             let input_strato = pesi * attivazione_corrente;
-            attivazione_corrente = input_strato.map(|x| self.funzione_attivazione.attiva(x));
+            attivazione_corrente = input_strato.map( |x| self.funzioni_attivazione[i].attiva(x) );
             uscite.push(attivazione_corrente.clone());
+
+            // l'indice dipende dal numero di funzioni di attivazioni presenti 
+            if i < self.funzioni_attivazione.len() - 1 {
+                i += 1;
+            }else {
+                i = 0;
+            }
+            
         }
 
         uscite
@@ -354,16 +409,25 @@ impl ReteNeurale {
     /// * `uscite` - Le uscite di ogni strato dalla propagazione in avanti.
     /// * `target` - Il vettore dei valori target.
     fn _retropropagazione(&mut self, uscite: Vec<DVector<f64>>, target: &DVector<f64>) {
+        let mut j = self.funzioni_attivazione.len()-1;
         let mut errore = target - &uscite[uscite.len() - 1];
-        let mut delta = errore.component_mul(&uscite[uscite.len() - 1].map(|x| self.funzione_attivazione.derivata(x)));
+        let mut delta = errore.component_mul(&uscite[uscite.len() - 1].map(|x| self.funzioni_attivazione[j].derivata(x)));
 
         for (i, pesi) in self.strati.iter_mut().enumerate().rev() {
+            
+            // l'indice 'j' dipende dal numero di funzioni di attivazioni presenti 
+            if j > 0 { // N.B.: Da verificare ?!!
+                j -= 1;
+            } else {
+                j = self.funzioni_attivazione.len() - 1;
+            }
+
             let uscita_precedente = &uscite[i];
             *pesi += self.tasso_apprendimento * (&delta * uscita_precedente.transpose());
 
             if i > 0 {
                 errore = pesi.transpose() * &delta;
-                delta = errore.component_mul(&uscite[i].map(|x| self.funzione_attivazione.derivata(x)));
+                delta = errore.component_mul(&uscite[i].map(|x| self.funzioni_attivazione[j].derivata(x)));
             }
         }
     }
@@ -407,9 +471,17 @@ impl ReteNeurale {
     pub fn salva_pesi_txt(&self, file_path: &str) -> Result<(), Error> {
         let mut file = File::create(file_path)?;
         writeln!( file, "{} {}",_FILE_INFO_APPRENDIMENTO, self.tasso_apprendimento )?;
-        writeln!( file, "{} {}{}",
-            _FILE_INFO_ATTIVAZIONE, self.funzione_attivazione.sigla(), 
-            if self.funzione_attivazione.sigla() == "LeakyReLU" { format!(" {}",self.funzione_attivazione.alfa()) } else {"".to_string()} )?;
+        
+        let mut nomi_funz_attivazione = String::new();
+        
+        for funzione_attivazione in self.funzioni_attivazione.clone().into_iter()  {
+            if funzione_attivazione.sigla() != "LeakyReLU" {
+                nomi_funz_attivazione += &(funzione_attivazione.sigla().to_string()+ "; ");
+            }else{
+                nomi_funz_attivazione += &(funzione_attivazione.sigla().to_string()+ "_" + funzione_attivazione.alfa().to_string().as_str() +"; ");
+            }
+        }
+        writeln!( file, "{} {}",_FILE_INFO_ATTIVAZIONE, nomi_funz_attivazione.as_str())?;
         writeln!( file, "{} {}", 
             _FILE_INFO_RETE, 
             format!("{:?}", self.dimensioni_strati ).replace("[", "").replace("]", "")
@@ -493,6 +565,7 @@ impl ReteNeurale {
         let mut strati = Vec::new();
         let mut attuale_strato:Vec<Vec<f64>> = Vec::new();
         
+        self.funzioni_attivazione.clear();
         
         for line in reader.lines() {
             let linea = line?;
@@ -506,31 +579,52 @@ impl ReteNeurale {
                      self.tasso_apprendimento = tasso;
                 }
             } else if linea.starts_with(_FILE_INFO_ATTIVAZIONE) {
-                let nome_funzione = linea.replace(_FILE_INFO_ATTIVAZIONE, "").trim().to_string();
-
-                self.funzione_attivazione = if nome_funzione.starts_with("LeakyReLU") {
-                    let alfa = nome_funzione.replace("LeakyReLU", "").trim().to_string().parse::<f64>().unwrap();
-                    Arc::new(LeakyReLU { alpha: alfa })
-                } else {
-                    match nome_funzione.as_str() {
-                        "Sigmoide"  => Arc::new(Sigmoide),
-                        "ReLU"      => Arc::new(ReLU),
-                        "Tanh"      => Arc::new(Tanh),
-                        "Softplus"  => Arc::new(Softplus),
-                        "Swish"     => Arc::new(Swish),
-                        _           => Arc::new(Sigmoide),
+                let nomi_funzioni = linea.replace(_FILE_INFO_ATTIVAZIONE, "").trim().to_string();
+                for nome_funzione in nomi_funzioni.split("; ").into_iter() {
+                    if nome_funzione.trim() != "" {
+                        let funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync>= if nome_funzione.starts_with("LeakyReLU") {
+                            let alfa = nome_funzione.split("_")
+                                    .map( |cifra| cifra.to_string().parse::<f64>().unwrap() )
+                                    .collect::<Vec<f64>>()[1];
+                            Arc::new(LeakyReLU { alpha: alfa })
+                        } else {
+                            match nome_funzione {
+                                "Sigmoide"  => Arc::new(Sigmoide),
+                                "ReLU"      => Arc::new(ReLU),
+                                "Tanh"      => Arc::new(Tanh),
+                                "Softplus"  => Arc::new(Softplus),
+                                "Swish"     => Arc::new(Swish),
+                                _           => Arc::new(Sigmoide),
+                            }
+                        };
+                        self.funzioni_attivazione.push(funzione_attivazione);
                     }
                 }
-                
-                
+
             } else if linea.starts_with(_FILE_INFO_RETE) {
                 let strati = linea.replace(_FILE_INFO_RETE, "").trim()
                         .split(", ")
                         .map( |cifra| cifra.to_string().parse::<usize>().unwrap() )
                         .collect::<Vec<usize>>();
                 if strati.len() > 0 {
-                    self.dimensioni_strati = strati;
-                    Self::nuova(self.dimensioni_strati.clone(), self.tasso_apprendimento, self.funzione_attivazione.clone());
+                    self.dimensioni_strati = strati;    
+                    
+                    let mut info_strati = Vec::new();
+                    let mut i: usize = 0;
+                    for neuroni_strato in  self.dimensioni_strati.clone().into_iter() {
+                        info_strati.push( 
+                            Strato {
+                                neuroni: neuroni_strato,
+                                funzione_attivazione: self.funzioni_attivazione[i].clone()
+                            }
+                        );
+                        if i < self.funzioni_attivazione.len()  {
+                            i += 1;
+                        }else {
+                            i = 0; // nel caso   self.funzioni_attivazione.len() <  self.dimensioni_strati.len()
+                        }
+                    }                                                             
+                    Self::nuova(info_strati, self.tasso_apprendimento );
                 }
             } else if linea.trim() == _FILE_STRATO {
                 let num_righe = attuale_strato.len();
@@ -567,11 +661,18 @@ impl ReteNeurale {
         self.dimensioni_strati.to_vec()
     }
 
-    /// Nome della funzione di attivazione
-    pub fn funzione_attivazione (&self) ->  &str {
-        self.funzione_attivazione.nome()
+    /// Nome della funzione di attivazione degli strati
+    /// 
+    /// # Argomenti
+    ///
+    /// * `indice` - è riferito alla posizione nella lista delle funzioni di attivazione associata allo strato,
+    /// di norma corrisponde all'indice dello strato (se la lista è uguale o maggiore del numero degli strati)
+    /// 
+    pub fn funzione_attivazione (&self,indice:usize) ->  &str {
+        self.funzioni_attivazione[indice].nome()
     }
 
+    /// Tasso di apprendimento.
     pub fn tasso_apprendimento (&self) ->  f64 {
         self.tasso_apprendimento
     }

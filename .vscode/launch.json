@@ -9,6 +9,49 @@
             "name": "run App",
             "request": "launch",
             "type": "node-terminal"
+        },
+        
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug RUST [back-end]",
+            "cargo": {
+              "args": [
+                "build",
+                "--manifest-path=./src-tauri/Cargo.toml",
+                "--features=test-rust"
+              ]
+            }
+        },
+/*
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Sviluppo",
+            "cargo": {
+              "args": [
+                "build",
+                "--manifest-path=./src-tauri/Cargo.toml",
+                "--no-default-features"
+              ]
+            },
+            // task for the `beforeDevCommand` if used, must be configured in `.vscode/tasks.json`
+            "preLaunchTask": "ui:dev"
+        },
+
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Produzione",
+            "cargo": {
+              "args": ["build", "--release", "--manifest-path=./src-tauri/Cargo.toml"]
+            },
+            // task for the `beforeBuildCommand` if used, must be configured in `.vscode/tasks.json`
+            "preLaunchTask": "ui:build"
         }
+*/
+
     ]
 }
+
+

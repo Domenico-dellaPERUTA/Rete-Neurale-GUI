@@ -1,5 +1,4 @@
-// /* 
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+ // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod rete_neurale_mlp;
 use std::sync::{Arc, RwLock};
@@ -18,6 +17,7 @@ static INPUT_ADDESTRAMENTO: RwLock<Vec<InputAddestramento>> = RwLock::new(vec![]
 #[tauri::command]
 fn crea_rete(apprendimento: f64, attivazione: &str, neuroni: Vec<usize>, alfa: f64) -> (String, Vec<Vec<Vec<f64>>>) {
     // Scegli la funzione di attivazione basata sulla stringa 'attivazione'
+ /*
     let funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync> = match attivazione {
         "Sigmoide"  => Arc::new(Sigmoide),
         "ReLU"      => Arc::new(ReLU),
@@ -41,6 +41,8 @@ fn crea_rete(apprendimento: f64, attivazione: &str, neuroni: Vec<usize>, alfa: f
     } else {
         ("Errore: rete neurale non creata".to_string(), vec![vec![vec![]]])
     }
+    */
+    ("Errore: rete neurale non creata".to_string(), vec![vec![vec![]]])
 }
 
 #[tauri::command]
@@ -111,7 +113,7 @@ fn carica_rete(nome: String, file: String) -> (String, Vec<Vec<Vec<f64>>>,Vec<us
             format!("{file:?}").to_string(), // messaggio
             rete.pesi_connessioni(), // pesi
             rete.strati(),
-            rete.funzione_attivazione().to_string(),
+            String::new(),//rete.funzione_attivazione().to_string(), ........
             rete.tasso_apprendimento()
         )
     } else {
@@ -136,46 +138,55 @@ fn save(file: String) -> String  {
     }
 }
 
+#[cfg(not(feature = "test-rust"))]
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter,run,carica_rete,save])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-// */
+ //*/
 
- /* 
-mod rete_neurale_mlp;
-use std::{sync::Arc, time::Instant};
-
-use nalgebra::DVector;
-
-use crate::rete_neurale_mlp::rete_neurale::*;
+//------------------------------------------------------------------------------------------------
 
 
+#[cfg(feature = "test-rust")]
 fn main() {
-    let dimensioni_strati = vec![2, 10, 1];  // Input, due livelli nascosti, output
-    let tasso_apprendimento = 0.01;
 
-    let funzione_attivazione = Arc::new(Sigmoide) ; // Puoi cambiare la funzione di attivazione
-    let mut rete = ReteNeurale::carica("rete_neurale.txt");
-    /*
-    let mut rete = ReteNeurale::nuova(
-        dimensioni_strati,
-        tasso_apprendimento,
-        funzione_attivazione,
-    );
-*/
- /* 
-   let _ok = rete.carica_pesi_txt("rete_neurale.txt");
-   if let Err(s) = _ok {
-        panic!("{s}");
-   }
-*/
-  println!("Prima dell'addestramento ");
-    println!("{}",rete);
+    const TEST_ADDESTRA_NUOVA_RETE:bool = !true;
+    let mut rete:ReteNeurale;
+    if TEST_ADDESTRA_NUOVA_RETE  {
+        println!("[*]  -- TEST ADDESTRA NUOVA RETE -- ");
+        let tasso_apprendimento = 0.01;
 
-    // Dati di addestramento
+        let strati: Vec<Strato> = vec![
+            Strato {
+                neuroni: 2,
+                funzione_attivazione: Arc::new(ReLU)
+            },
+            Strato {
+                neuroni: 10,
+                funzione_attivazione: Arc::new(ReLU)
+            },
+            Strato {
+                neuroni: 1,
+                funzione_attivazione: Arc::new(Softplus)
+        }];
+    
+        rete = ReteNeurale::nuova(strati,tasso_apprendimento);
+
+    }else {
+        println!("[*]-- TEST CARICA RETE ESISTENTE ----------- ");
+/*
+        let _ok = rete.carica_pesi_txt("rete_neurale.txt");
+        if let Err(s) = _ok {
+             panic!("{s}");
+        }
+*/
+        rete = ReteNeurale::carica("rete_neurale.txt");
+    }
+
+     // Dati di addestramento
     let dati_addestramento = [
         InputAddestramento {input:vec![0.0, 0.0], output: vec![0.0]},
         InputAddestramento {input:vec![0.0, 1.0], output: vec![1.0]},
@@ -183,29 +194,39 @@ fn main() {
         InputAddestramento {input:vec![1.0, 1.0], output: vec![0.0]}
     ];
 
- /* 
-    // Addestramento della rete neurale
-    for _ in 0..1000000 {
-        for set in dati_addestramento.iter() {
-            rete.addestra(set.input.clone(), set.output.clone());
+    if TEST_ADDESTRA_NUOVA_RETE  {
+
+        println!("[+] Prima dell'addestramento ----------");
+        println!("{}",rete);
+
+        // Addestramento della rete neurale
+        for _ in 0..100000 {
+            for set in dati_addestramento.iter() {
+                rete.addestra(set.input.clone(), set.output.clone());
+            }
         }
+        println!("[-] Dopo addestramento ----------------");
+    }else{
+        println!("[-] Rete  Caricata ----------------");
     }
-    println!("Dopo addestramento ");
+
     println!("{}",rete);
- */
+
     // Test della rete
+    println!("[!] test apprendimento ------------------");
     for set in dati_addestramento.iter() {
         let uscita = rete.elabora(set.input.clone());
         println!("Input: {:?}, Previsto: {:?}, Uscita: {:?}", set.input, set.output, uscita);
     }
-  
 
- /* 
-    let _risultato = rete.salva_pesi_txt("rete_neurale.txt");
-    if let Err(e) = _risultato {
-        println!("{:?}",e);
+    if TEST_ADDESTRA_NUOVA_RETE  {
+        let _risultato = rete.salva_pesi_txt("rete_neurale.txt");
+        if let Err(e) = _risultato {
+            println!("{:?}",e);
+        }
     }
- */ 
+
+    println!("[*]-- FINE TEST --------------------------");
+
 }
 
-// */
