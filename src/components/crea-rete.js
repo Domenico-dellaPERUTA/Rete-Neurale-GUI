@@ -34,6 +34,7 @@ app.component('crea-rete', {
                 />
                 <span class="validity"></span>
             </div>
+            <!--
             <div>
                 <select 
                     id="tipo_funz_attivazione" 
@@ -66,13 +67,17 @@ app.component('crea-rete', {
                 <span class="validity"></span>
             </div>
             <img v-if="funz_attivazione !== '' " :src=" 'assets/'+ funz_attivazione + '.png' " alt="" width="auto" height="50" />
+         -->
         </div>
+       
         <div class="container-col">
             <table  class="colonna">
                 <thead>
                 <tr>
                     <th scope="col">Strato</th>
                     <th scope="col">N° Neuroni</th>
+                    <th scope="col">Funz. Attivazione</th>
+                    <th scope="col"> </th>
                 </tr>
                 </thead>
                 <tbody>
@@ -91,6 +96,40 @@ app.component('crea-rete', {
                             />
                         <span class="validity"></span>
                     </td>
+                    <td>
+                        <div>
+                            <select 
+                                v-model="item.funz_attivazione"
+                                tabindex="3" 
+                                required
+                                >
+                                <option value="">-- Funzione di attivazione --</option>
+                                <option value="Sigmoide">Sigmoide</option>
+                                <option value="ReLU">Rectified Linear Unit</option>
+                                <option value="LeakyReLU">ReLU (piccola pendenza)</option>
+                                <option value="Tanh">Tanh</option>
+                                <option value="Softplus">Softplus</option>
+                                <option value="Swish">Swish</option>
+                            </select>
+                            <span class="validity"></span>
+                        </div>
+                    </td>
+                    <td>
+                        <div v-if="item.funz_attivazione === 'LeakyReLU'" >
+                            <input 
+                                type="number" 
+                                tabindex="4" 
+                                inputmode="numeric"
+                                step="0.01"
+                                min="0.01"
+                                placeholder="pendenza"
+                                v-model.number="alfa"
+                                required
+                            />
+                            <span class="validity"></span>
+                        </div>
+                        <img v-if="item.funz_attivazione !== '' " :src=" 'assets/'+ item.funz_attivazione + '.png' " alt="" width="auto" height="50" />
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -108,7 +147,6 @@ app.component('crea-rete', {
         return {
             strati: NaN,
             apprendimento: NaN,
-            funz_attivazione:'',
             connessioni: [],
             alfa: 0.01
         }
@@ -119,7 +157,7 @@ app.component('crea-rete', {
             if(value){
                 this.connessioni = []
                 for(let i =0; i < value; i++){
-                    this.connessioni.push({neuroni: 0})
+                    this.connessioni.push({neuroni: 0,funz_attivazione:''})
                 }
             }
         },
@@ -128,7 +166,6 @@ app.component('crea-rete', {
                 'nuova-rete',
                 {
                     tasso_apprendimento : this.apprendimento,
-                    tipo_funz_attivazione: this.funz_attivazione,
                     neuroni: this.connessioni,
                     alfa: this.alfa
                 }

@@ -219,6 +219,30 @@ impl FunzioneAttivazione for Swish {
     }
 }
 
+/// Nessuana funzione di attivazione, si applica solo sui nodi di input.
+/// 
+#[derive(Clone)]
+pub struct Nessuna;
+
+impl FunzioneAttivazione for Nessuna {
+    fn attiva(&self, x: f64) -> f64 {
+        x
+    }
+
+    fn derivata(&self, x: f64) -> f64 {
+        0.0
+    }
+    fn nome(&self) -> &str {
+        "Nessua Funzione di Attivazione"
+    }
+    fn sigla(&self) -> &str {
+        "Null"
+    }
+    fn alfa(&self) -> f64 {
+        0.0
+    }
+}
+
 /*
     +---------------------------------------------------------------------------------------+
     |                               Classe Rete Neurale                                     |
@@ -313,11 +337,17 @@ impl ReteNeurale {
     /// * `funzioni_attivazione` - Lista delle funzioni di attivazione per singoli strati.
     /// 
     pub fn nuova( info_strati: Vec<Strato>, tasso_apprendimento: f64 ) -> Self {
-        let mut funzioni_attivazione = Vec::new();
+        let mut funzioni_attivazione:Vec<Arc<dyn FunzioneAttivazione + Send + Sync>> = Vec::new();
         let mut dimensioni_strati= Vec::new();
+        let mut primo_strato = true;
         for info_strato in info_strati.into_iter() {
             dimensioni_strati.push(info_strato.neuroni);
-            funzioni_attivazione.push(info_strato.funzione_attivazione);
+            if primo_strato {
+                primo_strato = false;
+                funzioni_attivazione.push(Arc::new(Nessuna));
+            }else{
+                funzioni_attivazione.push(info_strato.funzione_attivazione);
+            }
         }
         let mut rng = rand::thread_rng();
         let mut strati = Vec::with_capacity(dimensioni_strati.len() - 1);
@@ -357,7 +387,7 @@ impl ReteNeurale {
         let mut uscite = Vec::with_capacity(self.strati.len() + 1);
         let mut attivazione_corrente = input.clone();
         uscite.push(attivazione_corrente.clone());
-        let mut i=0;
+        let mut i=1; // la prima funzione di attivazione è nulla (perché non si applica allo strato degli input [i != 0] )
         for pesi in &self.strati {
             let input_strato = pesi * attivazione_corrente;
             attivazione_corrente = input_strato.map( |x| self.funzioni_attivazione[i].attiva(x) );
@@ -366,8 +396,10 @@ impl ReteNeurale {
             // l'indice dipende dal numero di funzioni di attivazioni presenti 
             if i < self.funzioni_attivazione.len() - 1 {
                 i += 1;
+            }else if self.funzioni_attivazione.len() > 1 {
+                i = 1; // salta il primo strato nullo di default (strato input)
             }else {
-                i = 0;
+                i = 0; // si verifica nel caso in cui e stato assegnato una solo funzione di attivazione (per tugli gli strati)
             }
             
         }
@@ -416,12 +448,16 @@ impl ReteNeurale {
         for (i, pesi) in self.strati.iter_mut().enumerate().rev() {
             
             // l'indice 'j' dipende dal numero di funzioni di attivazioni presenti 
-            if j > 0 { // N.B.: Da verificare ?!!
-                j -= 1;
-            } else {
-                j = self.funzioni_attivazione.len() - 1;
+            if self.funzioni_attivazione.len() == 1 {
+                j = 0; // caso in cui vie una sola funzione di attivazione per tutti gli strati
+            }else {
+                // caso con multi funzioni di attivazione (eccetto per l'input)
+                if j > 1 { // salta la prima funzione di attivazione associata agli input di default Nulla!!
+                    j -= 1;
+                } else {
+                    j = self.funzioni_attivazione.len() - 1;
+                }
             }
-
             let uscita_precedente = &uscite[i];
             *pesi += self.tasso_apprendimento * (&delta * uscita_precedente.transpose());
 
@@ -594,7 +630,7 @@ impl ReteNeurale {
                                 "Tanh"      => Arc::new(Tanh),
                                 "Softplus"  => Arc::new(Softplus),
                                 "Swish"     => Arc::new(Swish),
-                                _           => Arc::new(Sigmoide),
+                                _           => Arc::new(Nessuna),
                             }
                         };
                         self.funzioni_attivazione.push(funzione_attivazione);

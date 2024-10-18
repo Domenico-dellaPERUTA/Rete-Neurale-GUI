@@ -15,21 +15,33 @@ static INPUT_ADDESTRAMENTO: RwLock<Vec<InputAddestramento>> = RwLock::new(vec![]
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn crea_rete(apprendimento: f64, attivazione: &str, neuroni: Vec<usize>, alfa: f64) -> (String, Vec<Vec<Vec<f64>>>) {
+fn crea_rete(apprendimento: f64, attivazione: Vec<String>, neuroni: Vec<usize>, alfa: f64) -> (String, Vec<Vec<Vec<f64>>>) {
     // Scegli la funzione di attivazione basata sulla stringa 'attivazione'
- /*
-    let funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync> = match attivazione {
-        "Sigmoide"  => Arc::new(Sigmoide),
-        "ReLU"      => Arc::new(ReLU),
-        "LeakyReLU" => Arc::new(LeakyReLU { alpha: alfa }),
-        "Tanh"      => Arc::new(Tanh),
-        "Softplus"  => Arc::new(Softplus),
-        "Swish"     => Arc::new(Swish),
-        _           => return ("Errore: funzione di attivazione non valida".to_string(), vec![vec![vec![]]]),
-    };
-
-    // Crea una nuova rete neurale usando Arc per la funzione di attivazione
-    let rete = ReteNeurale::nuova(neuroni, apprendimento, funzione_attivazione.into());
+    
+    let mut strati = Vec::new();
+    let mut i = 0;
+    for dim_strato in neuroni.clone().into_iter() {
+       
+        let strato = Strato {
+            neuroni: dim_strato,
+            funzione_attivazione: match attivazione[i].as_str() {
+                "Sigmoide"  => Arc::new(Sigmoide),
+                "ReLU"      => Arc::new(ReLU),
+                "LeakyReLU" => Arc::new(LeakyReLU { alpha: alfa }),
+                "Tanh"      => Arc::new(Tanh),
+                "Softplus"  => Arc::new(Softplus),
+                "Swish"     => Arc::new(Swish),
+                _           => return ("Errore: funzione di attivazione non valida".to_string(), vec![vec![vec![]]]),
+            }
+        };
+        strati.push(strato);
+        if i > (neuroni.len() -1) {
+            i = 0;
+        }else{
+            i += 1;
+        }
+    }
+    let rete = ReteNeurale::nuova(strati,apprendimento);
 
     // Scrivi la nuova rete neurale all'interno di RETE
     let mut rete_guard = RETE.write().unwrap();
@@ -41,8 +53,6 @@ fn crea_rete(apprendimento: f64, attivazione: &str, neuroni: Vec<usize>, alfa: f
     } else {
         ("Errore: rete neurale non creata".to_string(), vec![vec![vec![]]])
     }
-    */
-    ("Errore: rete neurale non creata".to_string(), vec![vec![vec![]]])
 }
 
 #[tauri::command]
@@ -148,12 +158,14 @@ fn main() {
  //*/
 
 //------------------------------------------------------------------------------------------------
-
+//                              TEST BECK-END 
+//
+//$ cargo tauri dev --features "test-rust" 
 
 #[cfg(feature = "test-rust")]
 fn main() {
 
-    const TEST_ADDESTRA_NUOVA_RETE:bool = !true;
+    const TEST_ADDESTRA_NUOVA_RETE:bool = !!true;
     let mut rete:ReteNeurale;
     if TEST_ADDESTRA_NUOVA_RETE  {
         println!("[*]  -- TEST ADDESTRA NUOVA RETE -- ");
@@ -162,15 +174,15 @@ fn main() {
         let strati: Vec<Strato> = vec![
             Strato {
                 neuroni: 2,
-                funzione_attivazione: Arc::new(ReLU)
+                funzione_attivazione: Arc::new(Nessuna)
             },
             Strato {
-                neuroni: 10,
-                funzione_attivazione: Arc::new(ReLU)
+                neuroni: 16,
+                funzione_attivazione: Arc::new(Sigmoide)
             },
             Strato {
                 neuroni: 1,
-                funzione_attivazione: Arc::new(Softplus)
+                funzione_attivazione: Arc::new(LeakyReLU { alpha: 0.05 })
         }];
     
         rete = ReteNeurale::nuova(strati,tasso_apprendimento);
@@ -188,10 +200,11 @@ fn main() {
 
      // Dati di addestramento
     let dati_addestramento = [
-        InputAddestramento {input:vec![0.0, 0.0], output: vec![0.0]},
-        InputAddestramento {input:vec![0.0, 1.0], output: vec![1.0]},
+         InputAddestramento{input:vec![0.0, 1.0], output: vec![1.0]},
         InputAddestramento {input:vec![1.0, 0.0], output: vec![1.0]},
-        InputAddestramento {input:vec![1.0, 1.0], output: vec![0.0]}
+        InputAddestramento {input:vec![1.0, 1.0], output: vec![0.0]},
+        InputAddestramento {input:vec![0.0, 0.0], output: vec![1.0]}
+       
     ];
 
     if TEST_ADDESTRA_NUOVA_RETE  {

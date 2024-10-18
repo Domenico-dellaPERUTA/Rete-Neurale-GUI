@@ -18,7 +18,7 @@ const app =Vue.createApp({
         pesi: []
       },
       info :{
-        funzione_attivazione: "",
+        funzione_attivazione: [],
         tasso_apprendimento: 0,
         coeff_alfa: 0
       },
@@ -31,7 +31,7 @@ const app =Vue.createApp({
       // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
       
       this.rete.strati = infoRete.neuroni.map( item => item.neuroni );
-      this.info.funzione_attivazione = infoRete.tipo_funz_attivazione;
+      this.info.funzione_attivazione = infoRete.neuroni.map( item => item.funz_attivazione );
       this.info.tasso_apprendimento = infoRete.tasso_apprendimento;
       this.info.coeff_alfa = infoRete.alfa;
       const risposta = await invoke("crea_rete", { 
