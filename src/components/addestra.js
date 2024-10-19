@@ -67,7 +67,7 @@ app.component('addestra-rete', {
             </p>
         </div>
         <div id="diagramma-rete">
-            <rete-neurale  :strati="strati" :pesi="pesi"></rete-neurale>
+            <rete-neurale  :strati="strati" :pesi="pesi" :attivazione="info.funzione_attivazione"></rete-neurale>
         </div>
         <div id="tabella-set">
             <table id="tab-set">

@@ -97,7 +97,7 @@ app.component('crea-rete', {
                         <span class="validity"></span>
                     </td>
                     <td>
-                        <div>
+                        <template v-if="index > 0">
                             <select 
                                 v-model="item.funz_attivazione"
                                 tabindex="3" 
@@ -112,7 +112,7 @@ app.component('crea-rete', {
                                 <option value="Swish">Swish</option>
                             </select>
                             <span class="validity"></span>
-                        </div>
+                        </template>
                     </td>
                     <td>
                         <div v-if="item.funz_attivazione === 'LeakyReLU'" >
@@ -134,7 +134,7 @@ app.component('crea-rete', {
                 </tbody>
             </table>
             <div class="colonna">
-                <rete-neurale  :strati="getRete()"></rete-neurale>
+                <rete-neurale  :strati="getRete()" :attivazione="getFunzioneAttivazione()"></rete-neurale>
             </div>
         </div>
         
@@ -174,6 +174,9 @@ app.component('crea-rete', {
         },
         getRete(){
             return this.connessioni.map(strato=>strato.neuroni)
+        },
+        getFunzioneAttivazione(){
+            return this.connessioni.map(strato=>strato.funz_attivazione)
         }
       }
   })

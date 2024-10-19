@@ -3,7 +3,7 @@ app.component('esegui-rete', {
     /*html*/`
     <div id="esegui-rete">
         <div id="diagramma-rete">
-            <rete-neurale  :strati="strati" :pesi="pesi"></rete-neurale>
+            <rete-neurale  :strati="strati" :pesi="pesi" :attivazione="funz_attivazione"></rete-neurale>
         </div>
         <div id="input-rete">
             <div class="divTable">
@@ -99,6 +99,10 @@ app.component('esegui-rete', {
     </div>
     `,
     props: {
+        funz_attivazione: {
+            type: Array,
+            required: true
+        },
 
         /* [+] rete-neurale [+] */
         strati: {
@@ -135,7 +139,7 @@ app.component('esegui-rete', {
         result: {
             deep: true, // Aggiorna il grafico quando cambiano i pesi
             handler() {
-            this.setOutput();
+                this.setOutput();
             }
         },
     },

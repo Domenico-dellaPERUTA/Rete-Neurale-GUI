@@ -31,7 +31,7 @@ fn crea_rete(apprendimento: f64, attivazione: Vec<String>, neuroni: Vec<usize>, 
                 "Tanh"      => Arc::new(Tanh),
                 "Softplus"  => Arc::new(Softplus),
                 "Swish"     => Arc::new(Swish),
-                _           => return ("Errore: funzione di attivazione non valida".to_string(), vec![vec![vec![]]]),
+                _           => Arc::new(Nessuna),
             }
         };
         strati.push(strato);

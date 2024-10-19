@@ -5,6 +5,10 @@ app.component('rete-neurale', {
           <canvas ref="tela" :width="larghezzaTela" :height="altezzaTela"></canvas>
       </div>`,
   props: {
+      attivazione: {
+          type: Array,
+          required: true
+      },
       strati: {
           type: Array,
           required: true
@@ -13,7 +17,8 @@ app.component('rete-neurale', {
           type: Array,
           required: false,
           default: () => [] // Pesi opzionali
-      }
+      },
+
   },
   data() {
     return {
@@ -26,6 +31,12 @@ app.component('rete-neurale', {
     this.disegnaRete();
   },
   watch: {
+      attivazione: {
+        deep: true, // Aggiorna il grafico quando cambiano i pesi
+        handler() {
+          this.disegnaRete();
+        }
+      },
       strati: {
           deep: true, // Osserva cambiamenti profondi all'interno dell'array
           handler() {
@@ -60,7 +71,21 @@ app.component('rete-neurale', {
 
         for (let i = 0; i < neuroni; i++) {
           const y = yOffset + i * (2 * this.raggioNeurone + spazioVerticale);
-          this.disegnaNeurone(ctx, x, y);
+          let colore = "DarkGray";
+          if(this.attivazione && indiceStrato < this.attivazione.length  )
+            switch ( this.attivazione[indiceStrato] ) {
+                
+                                
+              case "Sigmoide":  colore = "DodgerBlue"; break;
+              case "ReLU":      colore = "Maroon"; break;
+              case "LeakyReLU": colore = "Chocolate"; break;
+              case "Tanh":      colore = "Aquamarine"; break;
+              case "Softplus":  colore = "Chartreuse"; break;
+              case "Swish":     colore = "MediumOrchid"; break;
+              default:
+                colore = "DarkGray"; break;
+            }
+          this.disegnaNeurone(ctx, x, y, colore);
 
           // Disegna le connessioni con lo strato successivo
           if (indiceStrato < this.strati.length - 1) {
@@ -81,10 +106,10 @@ app.component('rete-neurale', {
         }
       });
     },
-    disegnaNeurone(ctx, x, y) {
+    disegnaNeurone(ctx, x, y,colore) {
       ctx.beginPath();
       ctx.arc(x, y, this.raggioNeurone, 0, Math.PI * 2);
-      ctx.fillStyle = "blue";
+      ctx.fillStyle = colore;
       ctx.fill();
       ctx.strokeStyle = "black";
       ctx.stroke();

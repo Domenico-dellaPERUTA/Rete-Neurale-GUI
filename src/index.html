@@ -40,6 +40,7 @@
         <esegui-rete v-else-if = "step == 3"
           :strati="rete.strati" 
           :pesi="rete.pesi"
+          :funz_attivazione="info.funzione_attivazione"
           @run="runTest"
           :result="output"
           @save="saveNetwork"
