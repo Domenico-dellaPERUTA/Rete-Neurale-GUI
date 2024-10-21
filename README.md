@@ -12,3 +12,13 @@ This template should help get you started developing with Tauri in vanilla HTML,
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) + [Vue.js](https://vuejs.org)
+
+## Install
+
+- install xcode
+- install Visual Studio Code / VS Codium
+- install Rust (with Cargo)
+- $ git clone https://github.com/Domenico-dellaPERUTA/Rete-Neurale-GUI 
+- $ cd Rete-Neurale-GUI
+- $ cargo install tauri-cli --version '^1.0' 
+- $ cargo install create-tauri-app --locked
