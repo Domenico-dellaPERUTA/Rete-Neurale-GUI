@@ -97,9 +97,14 @@ app.component('addestra-rete', {
             </div>
             <div>
                 <input
-                    type="number" step="1000" 
+                    width="12rem"
+                    v-if="iter > 0"
+                    type="number" 
+                    inputmode="numeric"
+                    step="1" 
                     min="1" 
                     v-model.number="iter"
+                    placeholder="cicli di apprendimento"
                     required/> 
                 <span class="validity"></span> 
             </div>
@@ -143,7 +148,7 @@ app.component('addestra-rete', {
             input: [],
             output : []
           },
-          iter:100000,
+          iter: NaN,
         };
       },
       mounted() {
@@ -210,6 +215,7 @@ app.component('addestra-rete', {
         },
         onSalva(){
             this.$emit('set-addestramento', this.list_set);
+            this.iter = 100000;
         },
         onAddestra(){
             this.$emit('addestra', this.iter);

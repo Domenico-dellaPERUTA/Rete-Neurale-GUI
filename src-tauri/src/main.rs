@@ -1,10 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod rete_neurale_mlp;
-use std::sync::{Arc, RwLock, Mutex};
-use std::fs::File;
-use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
-use tauri::http::status;
+use std::sync::{Arc, RwLock};
 use std::thread;
 use tauri::Manager; // Importa Manager per usare emit_to
 use chrono::Local;

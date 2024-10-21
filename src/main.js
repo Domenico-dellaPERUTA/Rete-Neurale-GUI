@@ -107,7 +107,7 @@ const app =Vue.createApp({
         window.__TAURI__.event.listen("training_completed", (event) => {
           const rispostaFine = event.payload;
           this.messaggio += rispostaFine[0];
-          this.rete.pesi = rispostaFine[1];
+          this.rete.pesi  = rispostaFine[1];
           this.next();
           textarea.scrollTop = textarea.scrollHeight;  
         });
