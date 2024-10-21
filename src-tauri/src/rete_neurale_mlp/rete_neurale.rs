@@ -3,7 +3,6 @@ use rand::Rng;
 use std::fmt::{Display,Debug, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
-use std::str::FromStr;
 use std::sync::Arc;
 
 const _FILE_INFO_RETE :          &str = "[#] ";
@@ -11,6 +10,7 @@ const _FILE_INFO_APPRENDIMENTO:  &str = "[+] ";
 const _FILE_INFO_ATTIVAZIONE:    &str = "[*] ";
 const _FILE_STRATO:              &str = "---";
 
+#[derive(Clone)]
 /// Coppia di input-output del Set di Addestramento di una Rete Neurale.
 pub struct InputAddestramento {
     pub input: Vec<f64>,
@@ -444,7 +444,7 @@ impl ReteNeurale {
         let mut j = self.funzioni_attivazione.len()-1;
         let mut errore = target - &uscite[uscite.len() - 1];
         let mut delta = errore.component_mul(&uscite[uscite.len() - 1].map(|x| self.funzioni_attivazione[j].derivata(x)));
-
+            
         for (i, pesi) in self.strati.iter_mut().enumerate().rev() {
             
             // l'indice 'j' dipende dal numero di funzioni di attivazioni presenti 
@@ -549,7 +549,7 @@ impl ReteNeurale {
         for strato in &self.strati {
             let mut connessioni = vec![];
             for riga in strato.row_iter() {
-                let mut riga_connessioni = riga.iter()
+                let riga_connessioni = riga.iter()
                     .map(|valore| *valore)
                     .collect::<Vec<f64>>();
                 connessioni.push(riga_connessioni.clone());
@@ -617,14 +617,14 @@ impl ReteNeurale {
             } else if linea.starts_with(_FILE_INFO_ATTIVAZIONE) {
                 let nomi_funzioni = linea.replace(_FILE_INFO_ATTIVAZIONE, "").trim().to_string();
                 for nome_funzione in nomi_funzioni.split("; ").into_iter() {
-                    if nome_funzione.trim() != "" {
-                        let funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync>= if nome_funzione.starts_with("LeakyReLU") {
-                            let alfa = nome_funzione.split("_")
-                                    .map( |cifra| cifra.to_string().parse::<f64>().unwrap() )
-                                    .collect::<Vec<f64>>()[1];
+                    let nome_funzione_modificato = nome_funzione.to_string().replace(";", "").replace(" ", "");
+                    let mut _nome_funzione = nome_funzione_modificato.as_str();  
+                    if _nome_funzione.trim() != "" {
+                        let funzione_attivazione: Arc<dyn FunzioneAttivazione + Send + Sync>= if _nome_funzione.starts_with("LeakyReLU_") {
+                            let alfa = _nome_funzione.split("_").collect::<Vec<&str>>()[1].parse::<f64>().unwrap();
                             Arc::new(LeakyReLU { alpha: alfa })
                         } else {
-                            match nome_funzione {
+                            match _nome_funzione {
                                 "Sigmoide"  => Arc::new(Sigmoide),
                                 "ReLU"      => Arc::new(ReLU),
                                 "Tanh"      => Arc::new(Tanh),
@@ -712,7 +712,5 @@ impl ReteNeurale {
     pub fn tasso_apprendimento (&self) ->  f64 {
         self.tasso_apprendimento
     }
-
-
 }
 

@@ -1,6 +1,5 @@
 const { invoke } = window.__TAURI__.tauri;
 
-
 let oInputStrati;
 let oSelectFunzAttivazione;
 let oMessage;
@@ -22,7 +21,11 @@ const app =Vue.createApp({
         tasso_apprendimento: 0,
         coeff_alfa: 0
       },
-      output: []
+      output: [],
+      addestra: {
+        avvio : false,
+        ascolto: false,
+      }
 
     }
   },
@@ -85,14 +88,35 @@ const app =Vue.createApp({
         this.messaggio += '\n' + risposta;
         index++;
       }
+      const textarea = document.getElementById("terminal");
+      textarea.scrollTop = textarea.scrollHeight;  
       //this.next();
     },
 
     async addestraRete(cicli){
-      const risposta = await invoke("iter", {nr: cicli});
-      this.messaggio  = risposta[0];
-      this.rete.pesi = risposta[1];
-      this.next();
+      this.addestra.avvio = true;
+      const textarea = document.getElementById("terminal");
+        
+      // ascolta backend ...
+      if(this.addestra.ascolto == false){
+        // log
+        window.__TAURI__.event.listen("log_training", (event) => {
+          this.messaggio = event.payload+"\n";
+          textarea.scrollTop = textarea.scrollHeight;  // Scorri verso il basso automaticamente
+        });
+        window.__TAURI__.event.listen("training_completed", (event) => {
+          const rispostaFine = event.payload;
+          this.messaggio += rispostaFine[0];
+          this.rete.pesi = rispostaFine[1];
+          this.next();
+          textarea.scrollTop = textarea.scrollHeight;  
+        });
+        // fine 
+        this.addestra.ascolto = true;
+      }
+      // avvio ...
+       await invoke("iter", {nr: cicli});
+      
     },
 
     async runTest(input){

@@ -90,18 +90,24 @@ app.component('addestra-rete', {
             </table>
         </div>
         <template v-if="list_set.length > 0">
-            <button @click="onSalva()" >
-                <embed width="70" height="30" src="assets/upload-icon.svg"/>Carica Set
-            </button>
-            <input
-                type="number" step="1" 
-                min="1" 
-                v-model.number="iter"
-                required/> 
-            <span class="validity"></span> 
-            <button @click="onAddestra()" v-if="iter > 0" required>
-                <embed width="70" height="30" src="assets/teach-icon.svg"/>Addestra
-            </button>
+            <div>
+                <button @click="onSalva()" >
+                    <embed width="70" height="30" src="assets/upload-icon.svg"/>Carica Set
+                </button>
+            </div>
+            <div>
+                <input
+                    type="number" step="1000" 
+                    min="1" 
+                    v-model.number="iter"
+                    required/> 
+                <span class="validity"></span> 
+            </div>
+            <div>
+                <button @click="onAddestra()" v-if="iter > 0" required>
+                    <embed width="70" height="30" src="assets/teach-icon.svg"/>Addestra
+                </button>
+            </div>
         <template>
         
     </div>
@@ -137,7 +143,7 @@ app.component('addestra-rete', {
             input: [],
             output : []
           },
-          iter:0,
+          iter:100000,
         };
       },
       mounted() {
