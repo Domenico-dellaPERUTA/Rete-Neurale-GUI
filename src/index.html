@@ -31,10 +31,13 @@
         <addestra-rete v-else-if = "step == 2" 
           :strati="rete.strati" 
           :pesi="rete.pesi" 
-          :info="info" 
+          :info="info"
+          :system="system"
+          :list_set="listSet"
           @set-addestramento="caricaSet"
           @addestra="addestraRete"
           @cicli="cicliAddestramento"
+          @set="setAddestramento"
           >
         </addestra-rete>
         <esegui-rete v-else-if = "step == 3"

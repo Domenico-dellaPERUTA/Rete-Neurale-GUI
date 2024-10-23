@@ -65,8 +65,13 @@ app.component('addestra-rete', {
                 <b>Coff. pendenza minima: </b>
                 <span class="label"> {{info.coeff_alfa}}</span>
             </p>
+            <p>
+                <b>Info Sistema: </b> 
+                <span class="label"> {{system}}</span>
+            </p>
         </div>
-        <div id="diagramma-rete">
+        
+        <div class="diagramma-rete">
             <rete-neurale  :strati="strati" :pesi="pesi" :attivazione="info.funzione_attivazione"></rete-neurale>
         </div>
         <div id="tabella-set">
@@ -133,7 +138,17 @@ app.component('addestra-rete', {
             type: Object,
             required: false,
             default: () => {}
-        }
+        },
+        list_set: {
+            type: Array,
+            required: false,
+            default: () => [] 
+        },
+        system: {
+            type: String,
+            required: false,
+            default: () => ""
+        },
         /* [-] rete-neurale [-] */
 
 
@@ -143,12 +158,12 @@ app.component('addestra-rete', {
           nr_input: 0,
           nr_output: 0,
           max_row: 0,
-          list_set : [],// [ ... {id: 23, input: [1,0,1,1], output: [1,2]} ...]
+          //list_set : [],// [ ... {id: 23, input: [1,0,1,1], output: [1,2]} ...]
           current_set : {
             input: [],
             output : []
           },
-          iter: NaN,
+          iter: NaN
         };
       },
       mounted() {
@@ -219,7 +234,7 @@ app.component('addestra-rete', {
         },
         onAddestra(){
             this.$emit('addestra', this.iter);
-            //this.list_set = [];
+            this.$emit('set', this.list_set);
         }
 
       }

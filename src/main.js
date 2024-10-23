@@ -25,12 +25,23 @@ const app =Vue.createApp({
       addestra: {
         avvio : false,
         ascolto: false,
-      }
+      },
+      listSet: [],
+      system : ''
 
     }
   },
+
   methods:{
+    async infoSystem(){
+      this.system = await invoke("get_system_info");
+    },
+    async setAddestramento(aSetList){
+      this.listSet = aSetList;
+    },
     async creaRete(infoRete){
+      this.infoSystem();
+      this.listSet = [];
       // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
       
       this.rete.strati = infoRete.neuroni.map( item => item.neuroni );
@@ -49,6 +60,7 @@ const app =Vue.createApp({
       this.next();
     },
     async caricaRete(file){
+      this.listSet = [];
       const risposta = await invoke("carica_rete", { 
         nome: file.name, 
         file: file.content
@@ -67,6 +79,7 @@ const app =Vue.createApp({
 
     async start(go){
       if(go)this.step++;
+      this.infoSystem();
     },
     next(){
       this.step++;

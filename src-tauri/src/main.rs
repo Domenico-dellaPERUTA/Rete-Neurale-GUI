@@ -10,6 +10,26 @@ use lazy_static::lazy_static;
 
 use crate::rete_neurale_mlp::rete_neurale::*;
 
+use sysinfo::{System, SystemExt, CpuExt};
+
+#[tauri::command]
+fn get_system_info() -> String {
+    let mut system = System::new_all();
+    system.refresh_all();
+
+    let os = system.name().unwrap_or_else(|| "Unknown".to_string());
+    let os_version = system.os_version().unwrap_or_else(|| "Unknown".to_string());
+    let cpu = system.global_cpu_info().brand().to_string();
+    let total_memory = system.total_memory(); // In kilobyte
+    let available_memory = system.available_memory(); // In kilobyte
+
+    format!(
+        "OS: {} {}\nCPU: {}\nTotal Memory: {} KB\nAvailable Memory: {} KB",
+        os, os_version, cpu, total_memory, available_memory
+    )
+}
+
+
 // Uso di Arc<RwLock> per rendere il puntatore thread-safe
 lazy_static! {
     static ref RETE: Arc<RwLock<Option<ReteNeurale>>> = Arc::new(RwLock::new(None));
@@ -158,7 +178,7 @@ fn save(file: String) -> String {
 #[cfg(not(feature = "test-rust"))]
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter, run, carica_rete, save])
+        .invoke_handler(tauri::generate_handler![crea_rete, addestra, iter, run, carica_rete, save, get_system_info])
         .setup(|app| {
             let window = app.get_window("main").unwrap();
             Ok(())

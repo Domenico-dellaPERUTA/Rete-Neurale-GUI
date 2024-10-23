@@ -235,16 +235,16 @@ button#start{
 }
 
 /***** pannello addestramento *****/
-div#info-rete{
+div#info-rete {
   display: inline-block;
-  left: 0;
-  vertical-align: top;
   text-align: left;
+  width: 30%;
   font-size: 1.2rem;
   color: rgb(0, 251, 255);
 }
-div#diagramma-rete{
-  width: auto;
+
+div.diagramma-rete{
+  width: 49%;
   display: inline-block;
 }
 
@@ -254,7 +254,7 @@ div#tabella-set{
   vertical-align: top;
 }
 table#tab-set{
-  width: 40rem;
+  width: 100rem;
   display: inline-block;
 }
 
@@ -265,7 +265,7 @@ span.label, label{
 }
 
 table#tab-set th{
-  width: 18rem;
+  width: 45rem;
 }
 
 table#tab-set th.button{

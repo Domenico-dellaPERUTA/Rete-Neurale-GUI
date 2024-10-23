@@ -2,7 +2,7 @@ app.component('esegui-rete', {
     template: 
     /*html*/`
     <div id="esegui-rete">
-        <div id="diagramma-rete">
+        <div class="diagramma-rete">
             <rete-neurale  :strati="strati" :pesi="pesi" :attivazione="funz_attivazione"></rete-neurale>
         </div>
         <div id="input-rete">
