@@ -2,14 +2,14 @@ app.component('addestra-rete', {
     template: 
     /*html*/`
     <div id="addestra-rete">
-        
+    <!-- ---------------- Dialog Addestramento ------------------------------------------ -->
         <dialog id="dialog">
             <form method="dialog" @submit.prevent="onNuovoSet" >
                 <div class="divTable">
                     <div class="divTableHeading">
                         <div class="divTableRow">
-                            <div class="divTableHead">INPUT [#]</div>
-                            <div class="divTableHead">OUTPUT [#]</div>
+                            <div class="divTableHead">INPUT [ {{nr_input}} ]</div>
+                            <div class="divTableHead">OUTPUT [ {{nr_output}} ]</div>
                         </div>
                     </div>
                     <div v-for="index in max_row" class="divTableBody">
@@ -51,6 +51,56 @@ app.component('addestra-rete', {
                 </div>
             </form>
         </dialog>
+
+        <!-- ---------------- Dialog File System ------------------------------------------ -->
+   
+        <dialog id="dialogSalvaSet">
+            <form id="formSave" method="dialog" @submit.prevent="onSalvaFile" >
+                <div class="title"> Esporta CSV 📄 </div>
+                       
+                <div class="divTable">
+                    <div class="divTableBody">
+                        <div class="divTableRow">
+                            <div class="divTableCellMin">
+                            <button @click="cercaCartella()" >Cerca 🔍 </button>
+                            </div> 
+                            <div class="divTableCellMax">
+                                <input 
+                                    id="path" 
+                                    v-model="file.path"
+                                    placeholder="percorso ..."
+                                    required/> 
+                                <span class="validity"></span> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divTableBody">
+                        <div class="divTableRow">
+                            <div class="divTableCellMin">
+                                
+                            </div> 
+                            <div class="divTableCellMax">
+                                <input 
+                                    id="file" 
+                                    placeholder="nome file ..."
+                                    v-model="file.name"
+                                    required/> 
+                                <span class="validity"></span> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <input 
+                        type="button" 
+                        @click="chiudiDialogSalva()" 
+                        value="Chiudi" />
+                    <input 
+                        type="submit" 
+                        value="Salva" />
+                </div>
+            </form>
+        </dialog>
         <!-- schermo principale -->
         <div id="info-rete">
             <p>
@@ -80,7 +130,24 @@ app.component('addestra-rete', {
                     <tr>
                         <th scope="col">Input</th>
                         <th scope="col">Output</th>
-                        <th class="button" scope="col"> <button @click="openDialogNew()"> <b>+</b> </button></th>
+                        <th class="button" scope="col"> 
+                            <button class="tooltip" @click="openDialogNew()"> 
+                                <b>📝</b> 
+                                <span class="tooltiptext"> Crea Set </span>
+                            </button>
+                        </th>
+                        <th class="button" scope="col"> 
+                            <button class="tooltip" @click=""> 
+                                <b>📥</b> 
+                                <span class="tooltiptext"> Importa File CSV </span>
+                            </button>
+                        </th>
+                        <th class="button" scope="col"> 
+                            <button class="tooltip" @click="esportaDati"> 
+                                <b>📤</b> 
+                                <span class="tooltiptext"> Esporta File CSV </span>
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -88,7 +155,9 @@ app.component('addestra-rete', {
                     
                         <td>{{item.input}}</td>
                         <td>{{item.output}}</td>
-                        <td><button :id="'button_' + item.id" @click="selezionaSet" > 🔍 </button></td>
+                        <td><button :id="'button_' + item.id"     class="tooltip" @click="selezionaSet" > 🔍 <span class="tooltiptext"> vedi/modifica </span> </button> </td>
+                        <td><button :id="'button_rm_' + item.id"  class="tooltip" @click="" > 🗑 <span class="tooltiptext"> elimina </span> </button> </td>
+                        <td></td>
                     </tr>
                     
                 </tbody>
@@ -163,7 +232,11 @@ app.component('addestra-rete', {
             input: [],
             output : []
           },
-          iter: NaN
+          iter: NaN,
+          file : {
+            name: '',
+            path: ''
+          },
         };
       },
       mounted() {
@@ -226,7 +299,6 @@ app.component('addestra-rete', {
                 this.current_set = item;
                 document.getElementById("dialog").showModal();
             }
-            
         },
         onSalva(){
             this.$emit('set-addestramento', this.list_set);
@@ -235,7 +307,78 @@ app.component('addestra-rete', {
         onAddestra(){
             this.$emit('addestra', this.iter);
             this.$emit('set', this.list_set);
+        },
+
+        _requiredForm(){
+            this.file = {
+                name: '',
+                path: ''
+            };
+        },
+        async cercaCartella() {
+            try {
+                const dialog  = window.__TAURI__.dialog;
+
+                // Usa Tauri per aprire una finestra di dialogo per selezionare la cartella
+                const selectedFolderPath = await dialog.open({
+                    directory: true, // Permette la selezione delle cartelle
+                });
+
+                if (selectedFolderPath) {
+                    this.file.path = selectedFolderPath; // Imposta il percorso della cartella
+                }
+            } catch (error) {
+                this._requiredForm();
+            }
+        },
+        async onSalvaFile() {
+            try {
+                if (this.file.path && this.file.name) {
+                    // Crea il percorso completo per salvare il file
+                    const saveFilePath = `${this.file.path}/${this.file.name.split('.csv')[0]}.csv`;
+                    if(saveFilePath){
+                        this._esportaDati(saveFilePath);
+                        document.getElementById("dialogSalvaSet").close();
+                    }
+                }
+            } catch (error) {
+                this._requiredForm();
+            }
+        },
+        esportaDati(){
+            document.getElementById("dialogSalvaSet").showModal();
+            this.file = {
+                name: '',
+                path: ''
+            };
+        },
+
+        chiudiDialogSalva(){
+            document.getElementById("dialogSalvaSet").close();
+        },
+
+        async  _esportaDati(filePath) {
+            const fs   = window.__TAURI__.fs;
+            const path = window.__TAURI__.path;
+
+            const rows = [];
+            rows.push("SET,INPUT,OUTPUT"); // Intestazione
+            for (let id=0; id < this.list_set.length; id++){
+                let current_set = this.list_set[id];
+                const maxLength = Math.max(current_set.output.length, current_set.input.length);
+                
+                // Creiamo le righe del CSV
+                for (let i = 0; i < maxLength; i++) {
+                    const outValue = current_set.output[i] !== undefined ? current_set.output[i] : "";
+                    const inValue  = current_set.input[i]  !== undefined ? current_set.input[i]  : "";
+                    rows.push(`${id},${inValue},${outValue}`);
+                }
+            }
+            // Converti l'array di righe in una stringa CSV
+            const csvContent = rows.join("\n");
+            await fs.writeTextFile(filePath, csvContent);
+            console.log(`Dati esportati con successo in ${filePath}`);
         }
 
-      }
+    }
 });
