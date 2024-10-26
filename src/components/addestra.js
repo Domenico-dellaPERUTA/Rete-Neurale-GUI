@@ -117,7 +117,7 @@ app.component('addestra-rete', {
             </p>
             <p>
                 <b>Info Sistema: </b> 
-                <span class="label"> {{system}}</span>
+                <span style="white-space: pre-wrap;" class="label"> {{system}}</span>
             </p>
         </div>
         
@@ -128,8 +128,8 @@ app.component('addestra-rete', {
             <table id="tab-set">
                 <thead>
                     <tr>
-                        <th scope="col">Input</th>
-                        <th scope="col">Output</th>
+                        <th scope="col"> Input [ {{nr_input}} ] </th>
+                        <th scope="col">Output [ {{nr_output}} ] </th>
                         <th class="button" scope="col"> 
                             <button class="tooltip" @click="openDialogNew()"> 
                                 <b>📝</b> 
@@ -137,7 +137,7 @@ app.component('addestra-rete', {
                             </button>
                         </th>
                         <th class="button" scope="col"> 
-                            <button class="tooltip" @click=""> 
+                            <button class="tooltip" @click="importaDati"> 
                                 <b>📥</b> 
                                 <span class="tooltiptext"> Importa File CSV </span>
                             </button>
@@ -151,19 +151,19 @@ app.component('addestra-rete', {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in list_set" >
+                    <tr v-for="item in listSet" :key="item.id" >
                     
                         <td>{{item.input}}</td>
                         <td>{{item.output}}</td>
                         <td><button :id="'button_' + item.id"     class="tooltip" @click="selezionaSet" > 🔍 <span class="tooltiptext"> vedi/modifica </span> </button> </td>
-                        <td><button :id="'button_rm_' + item.id"  class="tooltip" @click="" > 🗑 <span class="tooltiptext"> elimina </span> </button> </td>
+                        <td><button :id="'button_rm_' + item.id"  class="tooltip" @click="removeSet" > 🗑 <span class="tooltiptext"> elimina </span> </button> </td>
                         <td></td>
                     </tr>
                     
                 </tbody>
             </table>
         </div>
-        <template v-if="list_set.length > 0">
+        <template v-if=" listSet.length > 0">
             <div>
                 <button @click="onSalva()" >
                     <embed width="70" height="30" src="assets/upload-icon.svg"/>Carica Set
@@ -227,7 +227,7 @@ app.component('addestra-rete', {
           nr_input: 0,
           nr_output: 0,
           max_row: 0,
-          //list_set : [],// [ ... {id: 23, input: [1,0,1,1], output: [1,2]} ...]
+          listSet : [], // [ ... {id: 23, input: [1,0,1,1], output: [1,2]} ...]
           current_set : {
             input: [],
             output : []
@@ -239,11 +239,18 @@ app.component('addestra-rete', {
           },
         };
       },
+      watch: {
+        // Sincronizza le modifiche se `list_set` cambia dall'esterno
+        list_set(newVal) {
+          this.listSet = [...newVal];
+        }
+      },
       mounted() {
         this.init();
       },
       methods: {
         init(){
+            this.listSet = [... this.list_set];
             this.strati;
             if(this.strati && this.strati.length > 1){
                 this.nr_input = this.strati[0];
@@ -270,8 +277,8 @@ app.component('addestra-rete', {
         onNuovoSet(){
             if(this.current_set.id === undefined){// se è un nuovo lo aggiunga alla lista (altrimenti lo modifica soltanto)
                 if(this.current_set.input && this.current_set.output)
-                    this.list_set.push({
-                        id: this.list_set.length,
+                    this.listSet.push({
+                        id: this.listSet.length,
                         input : [...this.current_set.input],
                         output: [...this.current_set.output],
                     })
@@ -294,19 +301,19 @@ app.component('addestra-rete', {
         selezionaSet( {type, target }){
             const sId = target.id;
             const index = +sId.split('_')[1];
-            const item = this.list_set.find(item => item.id == index);
+            const item = this.listSet.find(item => item.id == index);
             if(item){
                 this.current_set = item;
                 document.getElementById("dialog").showModal();
             }
         },
         onSalva(){
-            this.$emit('set-addestramento', this.list_set);
+            this.$emit('set-addestramento', this.listSet);
             this.iter = 100000;
         },
         onAddestra(){
             this.$emit('addestra', this.iter);
-            this.$emit('set', this.list_set);
+            this.$emit('set', this.listSet);
         },
 
         _requiredForm(){
@@ -363,8 +370,8 @@ app.component('addestra-rete', {
 
             const rows = [];
             rows.push("SET,INPUT,OUTPUT"); // Intestazione
-            for (let id=0; id < this.list_set.length; id++){
-                let current_set = this.list_set[id];
+            for (let id=0; id < this.listSet.length; id++){
+                let current_set = this.listSet[id];
                 const maxLength = Math.max(current_set.output.length, current_set.input.length);
                 
                 // Creiamo le righe del CSV
@@ -378,7 +385,73 @@ app.component('addestra-rete', {
             const csvContent = rows.join("\n");
             await fs.writeTextFile(filePath, csvContent);
             console.log(`Dati esportati con successo in ${filePath}`);
+        },
+
+        async importaDati() {
+
+            const dialog  = window.__TAURI__.dialog;
+            try {
+                // Apri una finestra di dialogo per selezionare un file
+                const selectedFile = await dialog.open({
+                    filters: [{ name: 'CSV', extensions: ['csv'] }],
+                });
+      
+                if (selectedFile) {
+                    await this._importaDati(selectedFile);
+                };
+               
+            } catch (error) {
+              dialog.message(`Errore file selezionato:\n${error}`, { title: "Errore" , type: "error" });
+            }
+        },
+
+        async _importaDati(filePath) {
+            const fs = window.__TAURI__.fs;
+            const dialog  = window.__TAURI__.dialog;
+            
+            
+            // Leggi il contenuto del file CSV
+            const csvContent = await fs.readTextFile(filePath);
+            
+            // Dividi il contenuto in righe
+            const lines = csvContent.split("\n");
+            
+            // Salta l'intestazione ("SET,INPUT,OUTPUT")
+            lines.shift();
+    
+            // Mappa temporanea per raggruppare input e output per ciascun set
+            this.listSet = [];
+            for (const line of lines) {
+                if (!line.trim()) continue; // Salta righe vuote
+                const [setId, inValue, outValue] = line.split(",");
+                const id = parseInt(setId, 10);
+                
+                // Se il set non esiste, crealo
+                if (!this.listSet[id]) {
+                    this.listSet[id] = {id: id, input: [], output: [] };
+                }
+                
+                // Aggiungi valori di input e output (se non sono vuoti)
+                if (inValue)  this.listSet[id].input.push(parseFloat(inValue));
+                if (outValue) this.listSet[id].output.push(parseFloat(outValue));
+            }
+            // controllo
+            const oErrorItem = this.listSet.find( oSet=>oSet.input.length !== this.nr_input || oSet.output.length !== this.nr_output );
+            if(oErrorItem){
+                this.listSet.length = 0;
+                await dialog.message(`La riga ${oErrorItem.id} ha un numero di input = ${oErrorItem.input.length} \ne un numero di output = ${oErrorItem.output.length} !`, { title: "Errore" ,type: "error" });
+            }
+           
+        },
+        async removeSet(oEvent){
+            const id = +oEvent.target.id.replace('button_rm_','');
+            this.listSet  = this.listSet.filter(oSet => oSet.id != id );
+            
         }
+
+
+        
+        
 
     }
 });

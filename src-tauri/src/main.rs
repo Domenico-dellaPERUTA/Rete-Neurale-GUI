@@ -20,11 +20,11 @@ fn get_system_info() -> String {
     let os = system.name().unwrap_or_else(|| "Unknown".to_string());
     let os_version = system.os_version().unwrap_or_else(|| "Unknown".to_string());
     let cpu = system.global_cpu_info().brand().to_string();
-    let total_memory = system.total_memory(); // In kilobyte
-    let available_memory = system.available_memory(); // In kilobyte
+    let total_memory:f64 = system.total_memory() as f64  / 1_073_741_824.0; // In gigabyte
+    let available_memory:f64 = system.available_memory() as f64 / 1_073_741_824.0; // In gigabyte
 
     format!(
-        "OS: {} {}\nCPU: {}\nTotal Memory: {} KB\nAvailable Memory: {} KB",
+        "\nOS: {} {}\nCPU: {}\nTotal Memory: {} GB\nAvailable Memory: {:.2} GB",
         os, os_version, cpu, total_memory, available_memory
     )
 }
