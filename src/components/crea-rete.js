@@ -34,40 +34,7 @@ app.component('crea-rete', {
                 />
                 <span class="validity"></span>
             </div>
-            <!--
-            <div>
-                <select 
-                    id="tipo_funz_attivazione" 
-                    v-model="funz_attivazione"
-                    tabindex="3" 
-                    required
-                    >
-                    <option value="">-- Funzione di attivazione --</option>
-                    <option value="Sigmoide">Sigmoide</option>
-                    <option value="ReLU">Rectified Linear Unit</option>
-                    <option value="LeakyReLU">ReLU (piccola pendenza)</option>
-                    <option value="Tanh">Tanh</option>
-                    <option value="Softplus">Softplus</option>
-                    <option value="Swish">Swish</option>
-                </select>
-                <span class="validity"></span>
-            </div>
-            <div v-if="funz_attivazione === 'LeakyReLU'" >
-                <input 
-                    id="alfa" 
-                    type="number" 
-                    tabindex="4" 
-                    inputmode="numeric"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="pendenza"
-                    v-model.number="alfa"
-                    required
-                />
-                <span class="validity"></span>
-            </div>
-            <img v-if="funz_attivazione !== '' " :src=" 'assets/'+ funz_attivazione + '.png' " alt="" width="auto" height="50" />
-         -->
+   
         </div>
        
         <div class="container-col">
@@ -103,13 +70,13 @@ app.component('crea-rete', {
                                 tabindex="3" 
                                 required
                                 >
-                                <option value="">-- Funzione di attivazione --</option>
-                                <option value="Sigmoide">Sigmoide</option>
-                                <option value="ReLU">Rectified Linear Unit</option>
-                                <option value="LeakyReLU">ReLU (piccola pendenza)</option>
-                                <option value="Tanh">Tanh</option>
-                                <option value="Softplus">Softplus</option>
-                                <option value="Swish">Swish</option>
+                                <option value=""         > -- Funzione di attivazione -- </option>
+                                <option value="Sigmoide" > Sigmoide                      </option>
+                                <option value="ReLU"     > Rectified Linear Unit         </option>
+                                <option value="LeakyReLU"> ReLU (piccola pendenza)       </option>
+                                <option value="Tanh"     > Tanh     </option>
+                                <option value="Softplus" > Softplus </option>
+                                <option value="Swish"    > Swish    </option>
                             </select>
                             <span class="validity"></span>
                         </template>
@@ -139,7 +106,7 @@ app.component('crea-rete', {
         </div>
         
         <button  required type="submit">
-            <embed width="30" height="30" src="assets/create-icon.svg" />Crea
+        🛠 Crea
         </button>
     </form>
       `,

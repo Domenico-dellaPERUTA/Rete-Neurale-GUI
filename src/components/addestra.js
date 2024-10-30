@@ -101,7 +101,7 @@ app.component('addestra-rete', {
                 </div>
             </form>
         </dialog>
-        <!-- schermo principale -->
+        <!---------------------- schermo principale ----------------------->
         <div id="info-rete">
             <p>
                 <b>Funzione attivazione: </b> 
@@ -130,6 +130,7 @@ app.component('addestra-rete', {
                     <tr>
                         <th scope="col"> Input [ {{nr_input}} ] </th>
                         <th scope="col">Output [ {{nr_output}} ] </th>
+                        <th scope="col">Precisione  </th>
                         <th class="button" scope="col"> 
                             <button class="tooltip" @click="openDialogNew()"> 
                                 <b>📝</b> 
@@ -152,9 +153,10 @@ app.component('addestra-rete', {
                 </thead>
                 <tbody>
                     <tr v-for="item in listSet" :key="item.id" >
-                    
                         <td>{{item.input}}</td>
                         <td>{{item.output}}</td>
+                        <td v-for="(delta, idx) in item.delta" :key="idx" v-html="delta"></td>
+                        <td v-if="item.delta.length == 0" > - </td>
                         <td><button :id="'button_' + item.id"     class="tooltip" @click="selezionaSet" > 🔍 <span class="tooltiptext"> vedi/modifica </span> </button> </td>
                         <td><button :id="'button_rm_' + item.id"  class="tooltip" @click="removeSet" > 🗑 <span class="tooltiptext"> elimina </span> </button> </td>
                         <td></td>
@@ -166,7 +168,7 @@ app.component('addestra-rete', {
         <template v-if=" listSet.length > 0">
             <div>
                 <button @click="onSalva()" >
-                    <embed width="70" height="30" src="assets/upload-icon.svg"/>Carica Set
+                🚚 Carica Set
                 </button>
             </div>
             <div>
@@ -184,7 +186,7 @@ app.component('addestra-rete', {
             </div>
             <div>
                 <button @click="onAddestra()" v-if="iter > 0" required>
-                    <embed width="70" height="30" src="assets/teach-icon.svg"/>Addestra
+                👩🏽‍🎓 Addestra
                 </button>
             </div>
         <template>
@@ -227,7 +229,7 @@ app.component('addestra-rete', {
           nr_input: 0,
           nr_output: 0,
           max_row: 0,
-          listSet : [], // [ ... {id: 23, input: [1,0,1,1], output: [1,2]} ...]
+          listSet : [], // [ ... {id: 23, input: [1,0,1,1], output: [1,2], delta: []} ...]
           current_set : {
             input: [],
             output : []
@@ -281,6 +283,7 @@ app.component('addestra-rete', {
                         id: this.listSet.length,
                         input : [...this.current_set.input],
                         output: [...this.current_set.output],
+                        delta:  []
                     })
                 // resetta
                 delete this.current_set.id;
@@ -388,7 +391,6 @@ app.component('addestra-rete', {
         },
 
         async importaDati() {
-
             const dialog  = window.__TAURI__.dialog;
             try {
                 // Apri una finestra di dialogo per selezionare un file
@@ -408,29 +410,22 @@ app.component('addestra-rete', {
         async _importaDati(filePath) {
             const fs = window.__TAURI__.fs;
             const dialog  = window.__TAURI__.dialog;
-            
-            
             // Leggi il contenuto del file CSV
             const csvContent = await fs.readTextFile(filePath);
-            
             // Dividi il contenuto in righe
             const lines = csvContent.split("\n");
-            
             // Salta l'intestazione ("SET,INPUT,OUTPUT")
             lines.shift();
-    
             // Mappa temporanea per raggruppare input e output per ciascun set
             this.listSet = [];
             for (const line of lines) {
                 if (!line.trim()) continue; // Salta righe vuote
                 const [setId, inValue, outValue] = line.split(",");
                 const id = parseInt(setId, 10);
-                
                 // Se il set non esiste, crealo
                 if (!this.listSet[id]) {
-                    this.listSet[id] = {id: id, input: [], output: [] };
+                    this.listSet[id] = {id: id, input: [], output: [], delta:[] };
                 }
-                
                 // Aggiungi valori di input e output (se non sono vuoti)
                 if (inValue)  this.listSet[id].input.push(parseFloat(inValue));
                 if (outValue) this.listSet[id].output.push(parseFloat(outValue));
@@ -441,17 +436,10 @@ app.component('addestra-rete', {
                 this.listSet.length = 0;
                 await dialog.message(`La riga ${oErrorItem.id} ha un numero di input = ${oErrorItem.input.length} \ne un numero di output = ${oErrorItem.output.length} !`, { title: "Errore" ,type: "error" });
             }
-           
         },
         async removeSet(oEvent){
             const id = +oEvent.target.id.replace('button_rm_','');
             this.listSet  = this.listSet.filter(oSet => oSet.id != id );
-            
         }
-
-
-        
-        
-
     }
 });

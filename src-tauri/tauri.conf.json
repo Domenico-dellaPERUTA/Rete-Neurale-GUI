@@ -47,5 +47,10 @@
         "icons/icon.ico"
       ]
     }
+  },
+  "plugins": {
+    "store": {
+      "dir": ".tauri/store"
+    }
   }
 }

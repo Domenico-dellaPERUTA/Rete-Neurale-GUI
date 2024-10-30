@@ -8,10 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
    
     <title>Tauri App</title>
-    <!--
-      <script type="module" src="/main.js" defer></script>
-    -->
-    
   </head>
 
   <body>
@@ -28,25 +24,27 @@
         
         <sfondo        v-if      = "step == 0" @go="start" @file="caricaRete"></sfondo>
         <crea-rete     v-else-if = "step == 1" @nuova-rete="creaRete" ></crea-rete>
+        
         <addestra-rete v-else-if = "step == 2" 
-          :strati="rete.strati" 
-          :pesi="rete.pesi" 
-          :info="info"
-          :system="system"
-          :list_set="listSet"
-          @set-addestramento="caricaSet"
-          @addestra="addestraRete"
-          @cicli="cicliAddestramento"
-          @set="setAddestramento"
+          :strati            = "rete.strati" 
+          :pesi              = "rete.pesi" 
+          :info              = "info"
+          :system            = "system"
+          :list_set          = "listSet"
+          @set-addestramento = "caricaSet"
+          @addestra          = "addestraRete"
+          @cicli             = "cicliAddestramento"
+          @set               = "setAddestramento"
           >
         </addestra-rete>
+
         <esegui-rete v-else-if = "step == 3"
-          :strati="rete.strati" 
-          :pesi="rete.pesi"
-          :funz_attivazione="info.funzione_attivazione"
-          @run="runTest"
-          :result="output"
-          @save="saveNetwork"
+          :strati           = "rete.strati" 
+          :pesi             = "rete.pesi"
+          :funz_attivazione = "info.funzione_attivazione"
+          :result           = "output"
+          @run              = "runTest"
+          @save             = "saveNetwork"
           >
         </esegui-rete>
 
@@ -55,12 +53,13 @@
       </div>
     </div>
 
-    <script src="main.js"></script> <!-- definisce app -->
-    <script src="./components/sfondo.js"></script><!-- sfondo -->
-    <script src="./components/crea-rete.js"></script>
-    <script src="./components/rete-neurale.js"></script><!-- diagramma -->
-    <script src="./components/addestra.js"></script>
-    <script src="./components/esegui.js"></script>
+    <script src="main.js"                     ></script> 
+    <script src="./components/sfondo.js"      ></script>
+    <script src="./components/crea-rete.js"   ></script>
+    <script src="./components/rete-neurale.js"></script>
+    <script src="./components/addestra.js"    ></script>
+    <script src="./components/esegui.js"      ></script>
+    <script src="./components/attività.js"    ></script>
 
     <script>
       const mountendApp = app.mount('#app')

@@ -98,7 +98,7 @@ fn iter(app_handle: tauri::AppHandle, window: tauri::Window, nr: usize) {
     thread::spawn(move || {
         let mut rete_option = rete_arc.write().unwrap();
         let input_addestramento = input_addestramento.read().unwrap().clone();
-
+        let mut test = Vec::new();
         if let Some(rete) = rete_option.as_mut() {
             let inizio = Local::now();
             for i in 0..nr {
@@ -118,15 +118,20 @@ fn iter(app_handle: tauri::AppHandle, window: tauri::Window, nr: usize) {
                     rete.addestra(set.input.clone(), set.output.clone());
                 }
             }
+
+            for set in &input_addestramento {
+                let uscita = rete.elabora(set.input.clone());
+                test.push( vec![set.input.clone(), set.output.clone(), uscita] );
+            }
             
             // Chiama la notifica della fine del ciclo con la somma
-            notifica_fine_ciclo(&app_handle, format!("{}",rete), rete.pesi_connessioni());
+            notifica_fine_ciclo(&app_handle, format!("{}",rete), rete.pesi_connessioni(), (Local::now() - inizio.clone()).num_seconds(), test );
         }
     });
 }
 
-fn notifica_fine_ciclo(app_handle: &tauri::AppHandle, rete: String, risultato: Vec<Vec<Vec<f64>>>) {
-    let payload = json!([rete, risultato]);
+fn notifica_fine_ciclo(app_handle: &tauri::AppHandle, rete: String, pesi: Vec<Vec<Vec<f64>>>, durata:i64, test:Vec<Vec<Vec<f64>>> ) {
+    let payload = json!([rete, pesi,durata,test]);
     app_handle.emit_all("training_completed", payload).unwrap();
 }
 

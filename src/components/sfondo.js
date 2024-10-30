@@ -7,6 +7,7 @@ app.component('sfondo', {
     </canvas>
     <button  id="start" @click="onClick">Nuova Rete</button>
     <button id="upload" @click="selectFile">Carica Rete</button>
+    <json-tree-table :json-data="json"></json-tree-table>
   ` ,
   data() {
     return {
@@ -15,6 +16,13 @@ app.component('sfondo', {
       renderer: null,
       earth: null,
       rotationSpeed: 0.005,
+      json: {
+        name: "Root Node",
+        children: [
+          { name: "Child 1", value: "Value 1" },
+          { name: "Child 2", children: [{ name: "Grandchild", value: "Value 2" }] },
+        ],
+      },
     };
   },
   mounted() {

@@ -1,8 +1,5 @@
 const { invoke } = window.__TAURI__.tauri;
 
-let oInputStrati;
-let oSelectFunzAttivazione;
-let oMessage;
 
 
 /* ----------------------------- [ App ] ------------------------------ */
@@ -25,17 +22,33 @@ const app =Vue.createApp({
       addestra: {
         avvio : false,
         ascolto: false,
+        fine: false,
       },
       listSet: [],
-      system : ''
+      system : '',
+      attività: []
 
     }
   },
 
+  mounted() {
+      this.init();
+  },
   methods:{
+
+    async init(){
+      // Recupera i dati da LocalStorage
+      const savedSettings = localStorage.getItem("attività");
+      if(savedSettings){
+        this.attività = JSON.parse(savedSettings);
+      }
+
+    },
+
     async infoSystem(){
       this.system = await invoke("get_system_info");
     },
+
     async setAddestramento(aSetList){
       this.listSet = aSetList;
     },
@@ -108,6 +121,7 @@ const app =Vue.createApp({
 
     async addestraRete(cicli){
       this.addestra.avvio = true;
+      this.addestra.fine = false;
       const textarea = document.getElementById("terminal");
         
       // ascolta backend ...
@@ -121,8 +135,23 @@ const app =Vue.createApp({
           const rispostaFine = event.payload;
           this.messaggio += rispostaFine[0];
           this.rete.pesi  = rispostaFine[1];
+          const durata = rispostaFine[2];
+          const test = rispostaFine[3];
+          this._updateSetList(test); // aggiunge la precisione al Set
+          this.addestra.fine = true;
           this.next();
           textarea.scrollTop = textarea.scrollHeight;  
+          
+          this.attività.push({
+            data: new Date().toLocaleString('it'),
+            rete: this.strati,
+            set: this.listSet,
+            durata: durata,
+            test_uscite: test,
+            apprendimento: this.tasso_apprendimento,
+            sistema : this.sistema
+          });
+          localStorage.setItem("attività", JSON.stringify(this.attività));
         });
         // fine 
         this.addestra.ascolto = true;
@@ -131,6 +160,53 @@ const app =Vue.createApp({
        await invoke("iter", {nr: cicli});
       
     },
+
+    _updateSetList(mTest){
+
+      function formatScientificNotation(numero) {// Output: "-3,45 • 10⁻³" (HTML)
+        const [mantissa, esponente] = numero.toExponential(2).split('e');
+        const mantissaFormattata = mantissa.replace('.', ',');
+        const apiceMap = {
+          '-': '&#8315;',  // Codice Unicode per il segno meno in apice
+          '0': '&#8304;',
+          '1': '&#185;',
+          '2': '&#178;',
+          '3': '&#179;',
+          '4': '&#8308;',
+          '5': '&#8309;',
+          '6': '&#8310;',
+          '7': '&#8311;',
+          '8': '&#8312;',
+          '9': '&#8313;'
+        };
+        const esponenteFormattato = Array.from(esponente).map(digit => {
+          return apiceMap[digit] || '';
+        }).join('');
+      
+        return `${mantissaFormattata} &#183; 10 ${esponenteFormattato}; `;
+      }
+
+      const fnDifferenza = (vettoreReale, vettoreMisurato) => {
+        if (vettoreReale.length !== vettoreMisurato.length) {
+          return [];
+        }
+        return vettoreReale.map((valoreReale, indice) => {
+          const valoreMisurato = vettoreMisurato[indice];
+          const differenza = Math.abs(valoreReale - valoreMisurato); // Calcola la differenza assoluta
+          return formatScientificNotation(differenza); 
+        });
+      }
+
+      mTest.forEach(aSet => {
+        if(aSet && aSet.length == 3){
+          const aInputSet = aSet[0];
+          const oSet = this.listSet.find(oSet => oSet.input.length && oSet.input.toString() == aInputSet.toString())
+          oSet.delta = fnDifferenza(aSet[1],aSet[2]);
+        }
+      });
+    },
+
+    
 
     async runTest(input){
       const response = await invoke("run", {input: input});
