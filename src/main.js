@@ -144,12 +144,14 @@ const app =Vue.createApp({
           
           this.attività.push({
             data: new Date().toLocaleString('it'),
-            rete: this.strati,
+            rete: this.rete.strati,
+            funzione_attivazione: this.info.funzione_attivazione,
             set: this.listSet,
             durata: durata,
             test_uscite: test,
-            apprendimento: this.tasso_apprendimento,
-            sistema : this.sistema
+            apprendimento: this.info.tasso_apprendimento,
+            sistema : this.sistema,
+            cicli: cicli
           });
           localStorage.setItem("attività", JSON.stringify(this.attività));
         });

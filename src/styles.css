@@ -234,6 +234,24 @@ button#start{
   width: auto;
 }
 
+#attivita{
+  z-index: 900;
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  bottom: 2rem;
+  padding: 1.5rem;
+  width: 50%;
+  text-align: left;
+  font-size:x-large;
+  color: #35d0ced1;
+  background-color: #17171762;
+  height: min-content;
+}
+#attivita ul, #attivita {
+  list-style-type: none;
+}
+
 /***** pannello addestramento *****/
 div#info-rete {
   padding: 1rem;
@@ -390,5 +408,12 @@ form .title {
   visibility: visible;
   opacity: 1;
 }
+
+
+.item {
+  cursor: pointer;
+  background-color: transparent;
+}
+
 
 

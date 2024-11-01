@@ -1,13 +1,12 @@
-
 app.component('sfondo', {
   template: 
   /*html*/
   ` <canvas id="nokey" width="800" height="600">
         Il tuo Browser non supporta Canvar :/
     </canvas>
-    <button  id="start" @click="onClick">Nuova Rete</button>
-    <button id="upload" @click="selectFile">Carica Rete</button>
-    <json-tree-table :json-data="json"></json-tree-table>
+    <button  id="start" @click="onClick"> 🕸 Nuova Rete</button>
+    <button id="upload" @click="selectFile"> 📂 Carica Rete</button>
+    <report-attivita id="attivita"></report-attivita>
   ` ,
   data() {
     return {

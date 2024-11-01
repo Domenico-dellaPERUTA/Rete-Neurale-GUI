@@ -13,10 +13,10 @@
   <body>
     <div id="app">
       <nav style="display: inline-block;">
-        <button id="button-home"     :disabled="false"     @click="step = 0" >⌂</button>
-        <button id="button-crea"     :disabled="step <= 0" @click="step = 1" >Crea</button>
-        <button id="button-addestra" :disabled="step <= 1" @click="step = 2" >Addestra</button>
-        <button id="button-esegui"   :disabled="step <= 2" @click="step = 3" >Esegui</button>
+        <button id="button-home"     :disabled="false"     @click="step = 0" > 🏚 </button>
+        <button id="button-crea"     :disabled="step <= 0" @click="step = 1" > 🛠 Crea</button>
+        <button id="button-addestra" :disabled="step <= 1" @click="step = 2" > 🥊 Addestra</button>
+        <button id="button-esegui"   :disabled="step <= 2" @click="step = 3" > 🚀 Esegui</button>
       </nav>
       <h1 style="display: inline-block; width: 40rem;">{{ titolo }}</h1>
 
@@ -54,12 +54,13 @@
     </div>
 
     <script src="main.js"                     ></script> 
+    <script src="./components/attivita.js"    ></script>
     <script src="./components/sfondo.js"      ></script>
     <script src="./components/crea-rete.js"   ></script>
     <script src="./components/rete-neurale.js"></script>
     <script src="./components/addestra.js"    ></script>
     <script src="./components/esegui.js"      ></script>
-    <script src="./components/attività.js"    ></script>
+   
 
     <script>
       const mountendApp = app.mount('#app')
