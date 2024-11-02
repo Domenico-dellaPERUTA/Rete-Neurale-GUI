@@ -708,6 +708,16 @@ impl ReteNeurale {
         self.funzioni_attivazione[indice].nome()
     }
 
+    ///Lista di tutte le funzioni di attivazione per strati, dall'input verso l'output.
+    /// 
+    pub fn lista_funzioni_attivazioni(&self) -> Vec<String> {
+        let mut lista: Vec<String> =  vec![];
+        for funzione_attivazione in self.funzioni_attivazione.clone().into_iter()  {
+            lista.push(funzione_attivazione.sigla().to_string());
+        }
+        return lista;
+    }
+
     /// Tasso di apprendimento.
     pub fn tasso_apprendimento (&self) ->  f64 {
         self.tasso_apprendimento

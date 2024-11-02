@@ -147,7 +147,7 @@ fn run(input: Vec<f64>) -> (String, Vec<f64>) {
 }
 
 #[tauri::command]
-fn carica_rete(nome: String, file: String) -> (String, Vec<Vec<Vec<f64>>>, Vec<usize>, String, f64) {
+fn carica_rete(nome: String, file: String) -> (String, Vec<Vec<Vec<f64>>>, Vec<usize>, Vec<String>, f64) {
     let rete = ReteNeurale::carica(nome.as_str());
 
     let mut rete_guard = RETE.write().unwrap();
@@ -158,11 +158,11 @@ fn carica_rete(nome: String, file: String) -> (String, Vec<Vec<Vec<f64>>>, Vec<u
             format!("{file:?}").to_string(),
             rete.pesi_connessioni(),
             rete.strati(),
-            String::new(),
+            rete.lista_funzioni_attivazioni(),
             rete.tasso_apprendimento()
         )
     } else {
-        ("Errore: rete neurale non creata".to_string(), vec![vec![vec![]]], vec![], "".to_string(), 0.0)
+        ("Errore: rete neurale non creata".to_string(), vec![vec![vec![]]], vec![], vec![], 0.0)
     }
 }
 

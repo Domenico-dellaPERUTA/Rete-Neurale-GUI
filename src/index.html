@@ -13,17 +13,26 @@
   <body>
     <div id="app">
       <nav style="display: inline-block;">
-        <button id="button-home"     :disabled="false"     @click="step = 0" > 🏚 </button>
-        <button id="button-crea"     :disabled="step <= 0" @click="step = 1" > 🛠 Crea</button>
-        <button id="button-addestra" :disabled="step <= 1" @click="step = 2" > 🥊 Addestra</button>
-        <button id="button-esegui"   :disabled="step <= 2" @click="step = 3" > 🚀 Esegui</button>
+        <button id="button-home"     :disabled="false"               @click="step = 0" > 🏚 </button>
+        <button id="button-crea"     :disabled="!rete.strati.length"        @click="step = 1" > 🛠 Crea</button>
+        <button id="button-addestra" :disabled="!rete.strati.length" @click="step = 2" > 🥊 Addestra</button>
+        <button id="button-esegui"   :disabled="!rete.strati.length"          @click="step = 3" > 🚀 Esegui</button>
       </nav>
       <h1 style="display: inline-block; width: 40rem;">{{ titolo }}</h1>
 
       <div class="container">
         
-        <sfondo        v-if      = "step == 0" @go="start" @file="caricaRete"></sfondo>
-        <crea-rete     v-else-if = "step == 1" @nuova-rete="creaRete" ></crea-rete>
+        <sfondo v-if = "step == 0" 
+          @go="start" 
+          @file="caricaRete"
+          ></sfondo>
+        <crea-rete     
+          v-else-if = "step == 1" 
+          @nuova-rete="creaRete" 
+          :lista_strati        = "rete.strati"
+          :funz_attivazione    = "info.funzione_attivazione"
+          :tasso_apprendimento = "info.tasso_apprendimento"
+          ></crea-rete>
         
         <addestra-rete v-else-if = "step == 2" 
           :strati            = "rete.strati" 

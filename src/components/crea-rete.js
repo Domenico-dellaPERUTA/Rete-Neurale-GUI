@@ -110,15 +110,49 @@ app.component('crea-rete', {
         </button>
     </form>
       `,
-      data(){
+    props: {
+        tasso_apprendimento: {
+            typeof: Number,
+            required: false
+        },
+        funz_attivazione: {
+            type: Array,
+            required: false
+        },
+
+        /* [+] rete-neurale [+] */
+        lista_strati: {
+            type: Array,
+            required: false
+        },
+    },
+    data(){
         return {
             strati: NaN,
             apprendimento: NaN,
             connessioni: [],
             alfa: 0.01
         }
-      },
-      methods:{
+    },
+
+    mounted() {
+        this.init(this.lista_strati, this.funz_attivazione);
+    },
+    methods:{
+        init(lista_strati, funz_attivazione){
+            if(lista_strati && funz_attivazione && funz_attivazione.length && lista_strati.length){
+                this.strati = lista_strati.length;
+                if(this.tasso_apprendimento)
+                    this.apprendimento = this.tasso_apprendimento;
+                
+                lista_strati.forEach((neuroniStrato, idStrato) => {
+                    this.connessioni.push({
+                        neuroni: neuroniStrato,
+                        funz_attivazione: funz_attivazione[idStrato]?? ''
+                    })
+                });
+            }
+        },
         setStrati({ type, target }){
             const value = target.value;
             if(value){
