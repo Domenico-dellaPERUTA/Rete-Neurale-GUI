@@ -77,6 +77,7 @@ app.component('crea-rete', {
                                 <option value="Tanh"     > Tanh     </option>
                                 <option value="Softplus" > Softplus </option>
                                 <option value="Swish"    > Swish    </option>
+                                <option value="Lineare"  > Lineare  </option>
                             </select>
                             <span class="validity"></span>
                         </template>

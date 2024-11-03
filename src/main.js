@@ -27,7 +27,6 @@ const app =Vue.createApp({
       listSet: [],
       system : '',
       attività: []
-
     }
   },
 
@@ -120,13 +119,14 @@ const app =Vue.createApp({
     },
 
     async addestraRete(cicli){
+      const dialog  = window.__TAURI__.dialog;
       this.addestra.avvio = true;
       this.addestra.fine = false;
       const textarea = document.getElementById("terminal");
         
       // ascolta backend ...
       if(this.addestra.ascolto == false){
-        // log
+        this.messaggio = "Avvio...\n";
         window.__TAURI__.event.listen("log_training", (event) => {
           this.messaggio = event.payload+"\n";
           textarea.scrollTop = textarea.scrollHeight;  // Scorri verso il basso automaticamente
@@ -137,9 +137,13 @@ const app =Vue.createApp({
           this.rete.pesi  = rispostaFine[1];
           const durata = rispostaFine[2];
           const test = rispostaFine[3];
-          this._updateSetList(test); // aggiunge la precisione al Set
+          if(this._updateSetList(test)) // aggiunge la precisione al Set
+            this.next();
+          else
+            dialog.message("Addestramento non riuscito: output > 0,1 ");
+
           this.addestra.fine = true;
-          this.next();
+          
           textarea.scrollTop = textarea.scrollHeight;  
           
           this.attività.push({
@@ -164,7 +168,7 @@ const app =Vue.createApp({
     },
 
     _updateSetList(mTest){
-
+      let ok = true;
       function formatScientificNotation(numero) {// Output: "-3,45 • 10⁻³" (HTML)
         const [mantissa, esponente] = numero.toExponential(2).split('e');
         const mantissaFormattata = mantissa.replace('.', ',');
@@ -195,6 +199,7 @@ const app =Vue.createApp({
         return vettoreReale.map((valoreReale, indice) => {
           const valoreMisurato = vettoreMisurato[indice];
           const differenza = Math.abs(valoreReale - valoreMisurato); // Calcola la differenza assoluta
+          if(differenza > 0.1 || differenza === NaN) ok=false;
           return formatScientificNotation(differenza); 
         });
       }
@@ -206,6 +211,7 @@ const app =Vue.createApp({
           oSet.delta = fnDifferenza(aSet[1],aSet[2]);
         }
       });
+      return ok;
     },
 
     

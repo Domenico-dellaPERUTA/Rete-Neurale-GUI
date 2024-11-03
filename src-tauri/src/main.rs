@@ -51,6 +51,7 @@ fn crea_rete(apprendimento: f64, attivazione: Vec<String>, neuroni: Vec<usize>, 
                 "Tanh"      => Arc::new(Tanh),
                 "Softplus"  => Arc::new(Softplus),
                 "Swish"     => Arc::new(Swish),
+                "Lineare"   => Arc::new(Lineare),
                 _           => Arc::new(Nessuna),
             }
         };

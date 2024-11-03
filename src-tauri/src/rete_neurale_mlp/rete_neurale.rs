@@ -243,6 +243,32 @@ impl FunzioneAttivazione for Nessuna {
     }
 }
 
+
+/// Implementazione della funzione Lineare.
+/// La funzione Lineare restituisce il valore in input senza alcuna trasformazione.
+#[derive(Clone)]
+pub struct Lineare;
+
+impl FunzioneAttivazione for Lineare {
+    fn attiva(&self, x: f64) -> f64 {
+        x
+    }
+
+    fn derivata(&self, x: f64) -> f64 {
+        1.0
+    }
+
+    fn nome(&self) -> &str {
+        "Lineare"
+    }
+    fn sigla(&self) -> &str {
+        "Lineare"
+    }
+    fn alfa(&self) -> f64 {
+        0.0
+    }
+}
+
 /*
     +---------------------------------------------------------------------------------------+
     |                               Classe Rete Neurale                                     |
@@ -630,6 +656,7 @@ impl ReteNeurale {
                                 "Tanh"      => Arc::new(Tanh),
                                 "Softplus"  => Arc::new(Softplus),
                                 "Swish"     => Arc::new(Swish),
+                                "Lineare"     => Arc::new(Lineare),
                                 _           => Arc::new(Nessuna),
                             }
                         };

@@ -82,6 +82,7 @@ app.component('rete-neurale', {
               case "Tanh":      colore = "Aquamarine"; break;
               case "Softplus":  colore = "Chartreuse"; break;
               case "Swish":     colore = "MediumOrchid"; break;
+              case "Lineare":   colore = "White"; break;
               default:
                 colore = "DarkGray"; break;
             }

@@ -13,10 +13,10 @@
   <body>
     <div id="app">
       <nav style="display: inline-block;">
-        <button id="button-home"     :disabled="false"               @click="step = 0" > 🏚 </button>
-        <button id="button-crea"     :disabled="!rete.strati.length"        @click="step = 1" > 🛠 Crea</button>
-        <button id="button-addestra" :disabled="!rete.strati.length" @click="step = 2" > 🥊 Addestra</button>
-        <button id="button-esegui"   :disabled="!rete.strati.length"          @click="step = 3" > 🚀 Esegui</button>
+        <button id="button-home"     :disabled="false"                @click="step = 0" > 🏚 </button>
+        <button id="button-crea"     :disabled="!rete.strati.length"  @click="step = 1" > 🛠 Crea</button>
+        <button id="button-addestra" :disabled="!rete.strati.length"  @click="step = 2" > 🥊 Addestra</button>
+        <button id="button-esegui"   :disabled="!rete.strati.length"  @click="step = 3" > 🚀 Esegui</button>
       </nav>
       <h1 style="display: inline-block; width: 40rem;">{{ titolo }}</h1>
 
@@ -42,7 +42,6 @@
           :list_set          = "listSet"
           @set-addestramento = "caricaSet"
           @addestra          = "addestraRete"
-          @cicli             = "cicliAddestramento"
           @set               = "setAddestramento"
           >
         </addestra-rete>

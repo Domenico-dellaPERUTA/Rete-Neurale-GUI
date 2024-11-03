@@ -19,7 +19,7 @@ app.component('addestra-rete', {
                                     v-if="index <= nr_input"  
                                     id=" 'input_'  + index " 
                                     type="number" step="0.001" 
-                                    min="0" max="1" 
+                                    placeholder="(−∞, +∞)"
                                     :tabindex="index + 1" 
                                     v-model.number="current_set.input[index-1]"
                                     required/> 
@@ -30,7 +30,8 @@ app.component('addestra-rete', {
                                     v-if="index <= nr_output" 
                                     id=" 'output_' + index " 
                                     type="number" step="0.001"
-                                    min="0" max="1" 
+                                    :min="range.min" :max="range.max" 
+                                    :placeholder="range.info"
                                     :tabindex="nr_input + index + 1" 
                                     v-model.number="current_set.output[index-1]"
                                     required/> 
@@ -239,6 +240,11 @@ app.component('addestra-rete', {
             name: '',
             path: ''
           },
+          range: {
+            max: 0,
+            min: 0,
+            info: ''
+          }
         };
       },
       watch: {
@@ -252,6 +258,37 @@ app.component('addestra-rete', {
       },
       methods: {
         init(){
+            const funzAttOutput = this.info.funzione_attivazione[this.info.funzione_attivazione.length-1];
+            switch (funzAttOutput) {
+                case 'Lineare':
+                case 'Null':
+                case 'Swish':
+                case 'Leaky ReLU':
+                    this.range.max = Infinity;
+                    this.range.min = -Infinity;
+                    this.range.info = '(−∞, +∞)';
+                    break;
+                case 'ReLU':
+                    this.range.max =  Infinity;
+                    this.range.min =  0;
+                    this.range.info = '[0, +∞)';
+                    break;
+                case 'Sigmoide':
+                    this.range.max =  1;
+                    this.range.min =  0;
+                    this.range.info = '[0, 1]';
+                    break;
+                case 'Tanh':
+                    this.range.max =  1;
+                    this.range.min = -1;
+                    this.range.info = '[-1, 1]';
+                    break;
+                default:
+                    this.range.max =  0;
+                    this.range.min =  0;
+                    this.range.info = '?';
+                    break;
+            }
             this.listSet = [... this.list_set];
             this.strati;
             if(this.strati && this.strati.length > 1){
