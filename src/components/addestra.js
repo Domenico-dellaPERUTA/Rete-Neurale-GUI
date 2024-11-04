@@ -102,6 +102,102 @@ app.component('addestra-rete', {
                 </div>
             </form>
         </dialog>
+
+        <!-- ---------------- Dialog Crea Dataset ------------------------------------------ -->
+   
+        <dialog id="dialogCreaDati">
+            <form id="formCreaSet" method="dialog" @submit.prevent="onGeneraDataset" >
+                <div class="title"> Genera Dataset 🏭 </div>
+                       
+                <div class="divTable">
+                    <div class="divTableBody">
+                        <div class="divTableRow">
+                            <div class="divTableCellMax">
+                                <input 
+                                    type="number"
+                                    id="nr_dataset" 
+                                    type="number" step="1"
+                                    min="1"
+                                    v-model="dataset.numero" 
+                                    placeholder="numero dataset"
+                                    required/> 
+                                <span class="validity"></span> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divTableBody">
+                        <div class="divTableRow">
+                            <div class="divTableCellMax">
+                                <input 
+                                    type="number"
+                                    id="input_min" 
+                                    type="number" step="0.0001"
+                                    v-model="dataset.range.min" 
+                                    placeholder="min Input"
+                                    @change="onCheckInputSet"
+                                    required/> 
+                                <span class="validity"></span> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divTableBody">
+                        <div class="divTableRow">
+                            <div class="divTableCellMax">
+                                <input 
+                                    type="number"
+                                    id="input_max" 
+                                    type="number" step="0.0001"
+                                    v-model="dataset.range.max" 
+                                    placeholder="max Input"
+                                    @change="onCheckInputSet"
+                                    required/> 
+                                <span class="validity"></span> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divTableBody">
+                        <div class="divTableRow">
+                            <div class="divTableCellMax">
+                                <input 
+                                    type="number"
+                                    id="input_dec" 
+                                    type="number" step="1"
+                                    max="4"
+                                    min="0"
+                                    v-model="dataset.range.dec" 
+                                    placeholder="decimali Input"
+                                    @change="onCheckInputSet"
+                                    required/> 
+                                <span class="validity"></span> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divTableBody">
+                        <div class="divTableRow">
+                            
+                            <div class="divTableCellMax">
+                                <input 
+                                    id="funzione" 
+                                    placeholder=" f : Inpit ⟼ Output ( es.: Input[0] + Input[1] )"
+                                    v-model="dataset.funzione"
+                                    required/> 
+                                <span class="validity"></span> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <input 
+                        type="button" 
+                        @click="chiudiDialogCreaDati" 
+                        value="Chiudi" />
+                    <input 
+                        type="submit" 
+                        value="Crea" />
+                </div>
+            </form>
+        </dialog>
+        
         <!---------------------- schermo principale ----------------------->
         <div id="info-rete">
             <p>
@@ -136,6 +232,12 @@ app.component('addestra-rete', {
                             <button class="tooltip" @click="openDialogNew()"> 
                                 <b>📝</b> 
                                 <span class="tooltiptext"> Crea Set </span>
+                            </button>
+                        </th>
+                        <th class="button" scope="col"> 
+                            <button class="tooltip" @click="creaDati"> 
+                                <b>🏭</b> 
+                                <span class="tooltiptext"> Auto genera DATASET </span>
                             </button>
                         </th>
                         <th class="button" scope="col"> 
@@ -243,7 +345,16 @@ app.component('addestra-rete', {
           range: {
             max: 0,
             min: 0,
-            info: ''
+            info: '',
+            dec: 0,
+          },
+          dataset : {
+            funzione: '',
+            numero: 1000,
+            range: {
+                min: -Infinity,
+                max: Infinity
+            }
           }
         };
       },
@@ -392,6 +503,7 @@ app.component('addestra-rete', {
                 this._requiredForm();
             }
         },
+
         esportaDati(){
             document.getElementById("dialogSalvaSet").showModal();
             this.file = {
@@ -477,6 +589,86 @@ app.component('addestra-rete', {
         async removeSet(oEvent){
             const id = +oEvent.target.id.replace('button_rm_','');
             this.listSet  = this.listSet.filter(oSet => oSet.id != id );
+        },
+        creaDati(){
+            document.getElementById("dialogCreaDati").showModal();
+            this.dataset = {
+                funzione: '',
+                numero: NaN,
+                range: {
+                    min: -Infinity,
+                    max: Infinity,
+                    info: '',
+                    dec: NaN
+                }
+            };
+        },
+        chiudiDialogCreaDati(){
+            document.getElementById("dialogCreaDati").close();
+        },
+
+        onCheckInputSet(){
+            if(this.dataset.range.min > this.dataset.range.max){
+                this.dataset.range.max = this.dataset.range.min = NaN;
+            }
+        },
+
+        onGeneraDataset(){
+            const numeroCasuale = (min, max, decimali) => {
+                const random = Math.random() * (max - min) + min;
+                return parseFloat(random.toFixed(decimali));
+            }
+            this.listSet = [];
+            for (let idDataset = 0; idDataset < this.dataset.numero; idDataset++) {
+                let aInput;
+                do {
+                    aInput = [];
+                    for (let idInput = 0; idInput < this.nr_input; idInput++) {
+                        const nInput = numeroCasuale(this.dataset.range.min,this.range.max,this.range.dec);
+                        aInput.push(nInput);
+                    }
+                } while (this.listSet.length && this.listSet.find( aInputSet => (aInputSet.input+'') === (aInput+'')) !== undefined );
+                
+
+                if(aInput.length)
+                    this.listSet.push({
+                        id: idDataset,
+                        input : aInput,
+                        output: [],
+                        delta:  []
+                    })
+            }
+        },
+
+        // const Input = [5, 10, 15];  // Esempio di valori in `Input`
+        // const expression = "Input[0] + Input[1] * 2 - Input[2]";
+        _calcola(Input,expression){
+            function isExpressionSafe(input) {
+                // Consente numeri, operatori, spazi, parentesi e variabili nel formato Input[i]
+                const regex = /^[0-9+\-*/().\s]+$|Input\[\d+\]/g;
+                const blacklistedKeywords = /(?:function|return|console|alert|{|}|=>)/;
+            
+                return regex.test(input) && !blacklistedKeywords.test(input);
+            }
+            
+            function safeEval(expression, Input) {
+                if (isExpressionSafe(expression)) {
+                    // Crea una nuova funzione con `Input` come argomento isolato
+                    return Function("Input", `"use strict"; return (${expression})`)(Input);
+                } else {
+                    throw new Error("Espressione non valida!");
+                }
+            }
+            
+            try {
+                const result = safeEval(expression, Input);
+                return result;
+            } catch (error) {
+                console.error(error.message);
+            }
+            return null;
         }
+
+        
     }
 });

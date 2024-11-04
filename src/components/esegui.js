@@ -21,7 +21,8 @@ app.component('esegui-rete', {
                                 v-if="index <= nr_input"  
                                 id=" 'input_'  + index " 
                                 type="number" step="0.001" 
-                                min="0" max="1" 
+                                :min="range.min" :max="range.max" 
+                                :placeholder="range.info"
                                 :tabindex="index + 1" 
                                 v-model.number="input[index-1]"
                                 required/> 
@@ -130,6 +131,11 @@ app.component('esegui-rete', {
             name: '',
             path: ''
           },
+          range: {
+            max: 0,
+            min: 0,
+            info: ''
+          }
         };
     },
     mounted() {
@@ -145,6 +151,38 @@ app.component('esegui-rete', {
     },
     methods: {
         init(){
+            const funzAttOutput = this.funz_attivazione[this.funz_attivazione.length-1];
+            switch (funzAttOutput) {
+                case 'Lineare':
+                case 'Null':
+                case 'Swish':
+                case 'Leaky ReLU':
+                    this.range.max = Infinity;
+                    this.range.min = -Infinity;
+                    this.range.info = '(−∞, +∞)';
+                    break;
+                case 'ReLU':
+                    this.range.max =  Infinity;
+                    this.range.min =  0;
+                    this.range.info = '[0, +∞)';
+                    break;
+                case 'Sigmoide':
+                    this.range.max =  1;
+                    this.range.min =  0;
+                    this.range.info = '[0, 1]';
+                    break;
+                case 'Tanh':
+                    this.range.max =  1;
+                    this.range.min = -1;
+                    this.range.info = '[-1, 1]';
+                    break;
+                default:
+                    this.range.max =  0;
+                    this.range.min =  0;
+                    this.range.info = '?';
+                    break;
+            }
+            
             const fnInitArray = (n,array) => {
                 for (let i = 0; i < n; i++) {
                     array.push(NaN);
