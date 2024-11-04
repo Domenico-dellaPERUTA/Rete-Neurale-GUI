@@ -110,6 +110,7 @@ app.component('addestra-rete', {
                 <div class="title"> Genera Dataset 🏭 </div>
                        
                 <div class="divTable">
+                    
                     <div class="divTableBody">
                         <div class="divTableRow">
                             <div class="divTableCellMax">
@@ -122,6 +123,13 @@ app.component('addestra-rete', {
                                     placeholder="numero dataset"
                                     required/> 
                                 <span class="validity"></span> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divTableBody">
+                        <div class="divTableRow">
+                            <div class="divTableCellMax">
+                                <span class="label"> INPUT </span> 
                             </div>
                         </div>
                     </div>
@@ -174,12 +182,19 @@ app.component('addestra-rete', {
                     </div>
                     <div class="divTableBody">
                         <div class="divTableRow">
-                            
                             <div class="divTableCellMax">
+                                <span class="label"> OUTPUT </span> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divTableBody">
+                        <div v-for="index in nr_output" class="divTableRow">
+                            <div class="divTableCellMax">
+                                <span class="label"> Ouput[{{index-1}}]: </span> 
                                 <input 
-                                    id="funzione" 
-                                    placeholder=" f : Inpit ⟼ Output ( es.: Input[0] + Input[1] )"
-                                    v-model="dataset.funzione"
+                                    :id=" 'funzione_' + index " 
+                                    placeholder="es.: Input[0] !== Input[1] ? 0 : 1 "
+                                    v-model="dataset.funzione[index]"
                                     required/> 
                                 <span class="validity"></span> 
                             </div>
@@ -349,7 +364,7 @@ app.component('addestra-rete', {
             dec: 0,
           },
           dataset : {
-            funzione: '',
+            funzione: [],
             numero: 1000,
             range: {
                 min: -Infinity,
@@ -593,7 +608,7 @@ app.component('addestra-rete', {
         creaDati(){
             document.getElementById("dialogCreaDati").showModal();
             this.dataset = {
-                funzione: '',
+                funzione: [],
                 numero: NaN,
                 range: {
                     min: -Infinity,
@@ -620,24 +635,34 @@ app.component('addestra-rete', {
             }
             this.listSet = [];
             for (let idDataset = 0; idDataset < this.dataset.numero; idDataset++) {
-                let aInput;
+                let aInput, aOutput=[];
                 do {
                     aInput = [];
                     for (let idInput = 0; idInput < this.nr_input; idInput++) {
-                        const nInput = numeroCasuale(this.dataset.range.min,this.range.max,this.range.dec);
+                        const nInput = numeroCasuale(this.dataset.range.min,this.dataset.range.max,this.dataset.range.dec);
                         aInput.push(nInput);
                     }
                 } while (this.listSet.length && this.listSet.find( aInputSet => (aInputSet.input+'') === (aInput+'')) !== undefined );
                 
+                if(this.dataset.funzione.length){
+                    this.dataset.funzione.forEach((sCode,i) => {
+                        const nOutput = sCode ? this._calcola(aInput,sCode) : NaN;
+                        if(nOutput !== NaN){
+                            aOutput.push(nOutput);
+                        }
+                        
+                    });
+                }
 
                 if(aInput.length)
                     this.listSet.push({
                         id: idDataset,
                         input : aInput,
-                        output: [],
+                        output: aOutput,
                         delta:  []
                     })
             }
+            document.getElementById("dialogCreaDati").close();
         },
 
         // const Input = [5, 10, 15];  // Esempio di valori in `Input`
