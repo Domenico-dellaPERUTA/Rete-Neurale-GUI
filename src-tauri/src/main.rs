@@ -106,15 +106,29 @@ fn iter(app_handle: tauri::AppHandle, window: tauri::Window, nr: usize) {
                 let adesso = Local::now();
                 let durata = (adesso.clone() - inizio.clone()).num_seconds();
                 if durata >= 10 {
+                    // Conversione della durata in ore, minuti e secondi
+                    let ore = durata / 3600;
+                    let minuti = (durata % 3600) / 60;
+                    let secondi = durata % 60;
+                    
+                    // Formattazione della durata in un'unica stringa in formato "hh:mm:ss"
+                    let durata_formattata = format!("{:02}:{:02}:{:02}", ore, minuti, secondi);
+
+                    // Calcolo percentuale con un decimale
+                    let percentuale = format!("{:.1}", (i as f32 / nr as f32) * 100.0);
+
                     window.emit(
                         "log_training", 
-                        format!("[{}] -> ciclo {i}/{nr}  {}s  {}%", 
-                            adesso.clone().format("%d/%m/%Y - %H:%M:%S").to_string(),
-                            durata,
-                            ((i as f32)/(nr as f32))*100.0
-                    )).unwrap();
+                        format!(
+                            "[{}] -> ciclo {}/{}  {}  {}%", 
+                            adesso.format("%d/%m/%Y - %H:%M:%S").to_string(),
+                            i,
+                            nr,
+                            durata_formattata,
+                            percentuale
+                        )
+                    ).unwrap();
                 }
-                
                 for set in &input_addestramento {
                     rete.addestra(set.input.clone(), set.output.clone());
                 }
